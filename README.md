@@ -8,7 +8,7 @@ We call upon everyone in the digital trade and transport space to participate an
 
 Note that you need to be a UN/CEFACT Delegate in order to formally contribute as Subject Matter Expert to this standard. Experts are expected to contribute to the work based solely on their expertise and to comply with the UN/CEFACT Code of Conduct and Ethics and the policy on Intellectual Property Rights.
 
-The project chair of the project is Maria Rosaria Ceccarelli. Editors are Nis Jespersen @nissimsan and Steve Capell @onthebreeze. 
+Chair of the project is Maria Rosaria Ceccarelli. Editors are Nis Jespersen @nissimsan and Steve Capell @onthebreeze. 
 
 ## Meetings
 Meetings are held Wednesdays 10:00–11:00 Central European Time, fortnightly starting January 19th 2022 (i.e. 19/01/2022, 02/02/2022, 16/02/2022...).
