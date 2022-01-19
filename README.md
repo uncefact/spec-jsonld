@@ -10,6 +10,8 @@ Note that you need to be a UN/CEFACT Delegate in order to formally contribute as
 
 To register please visit https://uncefact.unece.org/display/uncefactpublic/UNCEFACT+Expert+Registration and follow the registration process.
 
+The official UN/CEFACT project page can be found at https://uncefact.unece.org/display/uncefactpublic/JSON-LD+Web+Vocabulary
+
 Chair of the project is Maria Rosaria Ceccarelli. Editors are Nis Jespersen @nissimsan and Steve Capell @onthebreeze. 
 
 ## Meetings
