@@ -32,6 +32,11 @@ It has been agreed that the scope will NOT cover
 * API and Schemas
 * Data Modelling work as we are re-using existing work rather than creating new standards or subsets of existing.
 
+## Deliverables 
+
+1. A PDF / Word document which covers the project lifecycle including; Public Review logs and Final document ready for official publication.
+2. Code in the UN/CEFACT GitHub to deliver the published & maintained JSON-LD vocabulary
+
 ## Maintenance
 Release Cycles and practicalities.
 
