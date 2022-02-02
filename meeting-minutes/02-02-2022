@@ -1,0 +1,29 @@
+# Meeting Minutes 
+
+The group discussed to create a recurring calendar invite so that participants are notified of the call in their calendar software.  Nis will action this.
+
+Todays call clashed with the forum Bureau call so some people were unable to make the call.
+
+Due to Nis being on vacation we will exceptionally hold our meeting on Friday, calendar update to follow.
+
+
+## Pull Requests (PR's) 
+
+The pending PR's were agreed between the group and merged, see the commit history on main branch for today to identify which changes were accepted.
+
+PR #33 aboit edi3 docs caused a conflict and will be resolved later by @nissiman will cover this.
+
+## Issues
+
+We discussed moving through the issues in terms of least updated first and as we move forward any issues on edi3 over to here that are relevant as will be better served here in official project.
+
+For #19 @onthebreeze suggested creating a repo for sustainability to link to the traceability work that is ongoing and create a live case study covering global use cases.
+
+We pinned #23 and would encourage participants to make written suggestions or thoughts here on this topic, for example should we point at equivilence links i.e. on schema.org and place a PR for them to point back at UNECE.  What about the specifications i.e. a vessel, flight or similar which are modal specific, should they be allowed and point at the RDM so for example `vessel` is a modal specification of `transport means`.
+
+@cmsdroff will answer #29 UNLOCODEs are the base for international trade and used widely in many cases, so initially we have closed and will provide an explanation around this and why.
+
+We need to consider how a web developer who knows nothing about UNCEFACT can get to know the vocab, should it be a monolith page or broken down, how do they understand what a `transportMeans` really is in their language ? Some work was done on this as a dummies guide here https://cmsdroff.gitbook.io/standards-guide/ in reference to the terms but in relation to breaking down the vocab see issue #26
+
+
+
