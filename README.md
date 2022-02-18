@@ -15,7 +15,7 @@ The official UN/CEFACT project page can be found at https://uncefact.unece.org/d
 Chair of the project is Maria Rosaria Ceccarelli. Editors are Nis Jespersen @nissimsan and Steve Capell @onthebreeze. 
 
 ## Meetings
-Meetings are held Wednesdays 10:00–11:00 Central European Time, fortnightly starting January 19th 2022 (i.e. 19/01/2022, 02/02/2022, 16/02/2022...).
+Meetings are held fortnightly on Fridays 10:00–11:00 Central European Time (i.e. 18/02/2022, 04/03/2022, 18/03/2022...).
 
 The standing agenda is to review open Pull Requests, then open Issues. 
 
