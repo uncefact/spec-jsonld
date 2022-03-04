@@ -1,0 +1,41 @@
+# Minutes 
+
+## Attendee's
+Svante Schubert
+Hisano Sugamata
+Nis Jesperson
+Kevin Bishop
+David Roff
+
+## Topics
+Issue #67 is a core point that we need to address first, due to doing things with code rather than working in a previous way so the question is do we need to fork the vocab graph ?
+
+If we Fork we can use proper graph tools, however if we do this it will no longer be push a button and deploy.
+
+NDR's are key here for example `/#` should not be together do we go back and change the source code or work with it?
+
+If we take a real example:
+
+> FIATA added a new field `Warehouse Depositor` this needed to be added in Buy Ship Pay not in MMT so a level up.
+> If we publish the new model for BSP in the current way then we would need to do some kind of 'diff' to identiyf that this new element has been added
+> the technical team would then need to merge these changes selectively into the unece vocab.
+
+This wouldn't be at the click of a button like today when we publish an xsd for example, it would have the obvious consequence that another process is needed to publish if it is needed in the vocab.
+
+The advantage to moving down this path is consistency and ability to publish and maintain a vocab that can be replied upon without duplications etc.
+
+If we dont do whats #67 suggests it means everything will be pushed back into the process and library maintenance or domains i.e. points in #42, hence the question are we holding ourselves back unecessarily.
+
+Comments and thoughts should be added to https://github.com/uncefact/vocab/issues/67
+
+Some examples of these issues such as duplication can be found at https://github.com/uncefact/vocab/issues/42
+
+@cmsdroff to raise this with library maintenance for some suggestion of how it should be handled internally.
+
+duplication of elements that mean the same thing.
+
+The outcome of the call today was that we should all have a think about the topic and consider how we move forward to discuss on the next call.
+
+
+
+
