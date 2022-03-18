@@ -1,0 +1,39 @@
+#67
+David: best to pass issues back to modelling teams
+David to figure out a standing process
+Discussions about how semantic tickets are dealt with. David making a ticket for himself. 
+Decision: Will not fork. Closing ticket. 
+
+Steve: how to deal with subsets? 
+Proposal it to map them into contexts, pointing at the common vocabulary
+Steve will raise a ticket.
+
+Issue 7 - Kseniya to drop code.
+
+Running through issues from least recently updated: 
+
+Update spec with forking decision #71
+
+Define a process for reporting Semantic Issues back to UN/CEFACT #72
+
+Include transformation code #7 
+
+Add project scope section #8
+
+Include section on vocab update frequency #4
+
+Parasitic Word "Formatted" NDR #52
+
+Add list of overlapping vocabs to NDR. #73
+
+split Communication to subclasses semantics #60
+
+Consider a live case study to demonstrate #19
+
+deprecate/map UNCEFACT geospatial stuff in favor of OGC GeoSPARQL #54
+
+Prop Name Doublons #51
+
+use # or / rather than /# NDR #25
+
+use Rec20 codes rather than names in URL NDR #24
