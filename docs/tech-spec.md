@@ -526,3 +526,4 @@ Probably the most broadly used vocabulary on the internet. It has overlap on fou
 | uncefact:GeographicalSurface | owl:equivalentClass | sf:Surface |
 | uncefact:GeographicalMultiSurface | owl:equivalentClass | sf:MultiSurface |
 
+Considerations on GeoSPARQL are discussed on this ticket: https://github.com/uncefact/vocab/issues/54. 
