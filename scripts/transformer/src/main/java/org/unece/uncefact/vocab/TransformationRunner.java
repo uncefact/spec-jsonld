@@ -3,6 +3,7 @@ package org.unece.uncefact.vocab;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.unece.uncefact.vocab.transformers.BSPToJSONLDVocabulary;
 
 import java.io.IOException;
 import java.io.InputStream;

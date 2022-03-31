@@ -8,7 +8,7 @@ public abstract class Transformer {
     protected String inputFile;
     protected String outputFile;
 
-    Transformer(String inputFile, String outputFile) {
+    protected Transformer(String inputFile, String outputFile) {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
     }
