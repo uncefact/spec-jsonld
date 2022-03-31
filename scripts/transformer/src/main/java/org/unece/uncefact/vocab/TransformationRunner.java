@@ -7,6 +7,7 @@ import org.unece.uncefact.vocab.transformers.BSPToJSONLDVocabulary;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -18,9 +19,9 @@ public class TransformationRunner {
         Attributes mainAttributes = readProperties();
         String version = mainAttributes.getValue("Implementation-Version");
 
-        Option transformationTypeOption = new Option("t", true, "transformation type. Allowed values: CCL.");
-        Option inputFileOption = new Option("i", true, "an input file to be transformed. Accepted format for CCL type is xls.");
-        Option outputFileOption = new Option("o", true, "an output file to be created as a result of transformation.");
+        Option transformationTypeOption = new Option("t", true, "transformation type. Allowed values: BSP. Default value: BSP.");
+        Option inputFileOption = new Option("i", true, "an input file to be transformed. Accepted format for BSP type is xls. Required.");
+        Option outputFileOption = new Option("o", true, "an output file to be created as a result of transformation. Default value: output.jsonld.");
         Option versionOption = new Option("?", "version", false, "display this help.");
 
         options.addOption(transformationTypeOption);
@@ -36,9 +37,11 @@ public class TransformationRunner {
         if (cmd.hasOption(versionOption.getOpt())) {
             formatter.printHelp(String.format("java -jar vocab-transformer-%s.jar", version), options);
             return;
+        } else if(!cmd.hasOption(inputFileOption.getOpt())){
+            throw new MissingOptionException(inputFileOption.getOpt());
         }
 
-        String inputFileName = "BSP D20A Context CCL.xlsx";
+        String inputFileName = null;
         String outputFileName = "output.jsonld";
         String transformationType = "bsp";
         Transformer transformer = null;
