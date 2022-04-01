@@ -507,3 +507,23 @@ Some entities in the rec.21 vocabulary mix class-level abstraction with properti
 
 In some cases, part of the vocabulary such as base classes and properties could be exctracted to form the stable core vocabualry, while keeping other more specific and volatile subclasses and instances to be governed and published separately. Such distinction might be beneficial for maintaining long-term interoperability between codelist users.
 
+
+## Equivalence Vocabs
+There are many other vocabularies in the world beyond UN/CEFACT. Some of them have semantic overlap with parts of the UN/CEFACT vocabulary. This project is scoped to undiscriminately transform the full B-S-P model, including parts which may already be covered by a de-facto semantic standards. This section lists other vocabularies which implementers are encouraged to consider. These are included for information only, and should not be interpreted as preference in any direction; there may be reasons to choose either UN/CEFACT or alternative established vocabularies, depending on circumstances. 
+
+### schema.org
+Probably the most broadly used vocabulary on the internet. It has overlap on foundational elements such as Identifier, Organization, and Address.
+
+### GeoSPARQL
+| UNCEFACT Class | Mapping | GeoSPARQL Simple Features Class |
+|---|---|---|---|---|
+| uncefact:Polygon | owl:equivalentClass | sf:Polygon | 
+| uncefact:LinearRing | owl:equivalentClass | sf:LinearRing | 
+| uncefact:GeographicalPoint | owl:equivalentClass | sf:Point |
+| uncefact:GeographicalMultiPoint | owl:equivalentClass | sf:MultiPoint |
+| uncefact:GeographicalLine | owl:equivalentClass | sf:Line |
+| uncefact:GeographicalMultiCurve | owl:equivalentClass | sf:MultiCurve |
+| uncefact:GeographicalSurface | owl:equivalentClass | sf:Surface |
+| uncefact:GeographicalMultiSurface | owl:equivalentClass | sf:MultiSurface |
+
+Considerations on GeoSPARQL are discussed on this ticket: https://github.com/uncefact/vocab/issues/54. 
