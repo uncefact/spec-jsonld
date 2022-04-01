@@ -268,6 +268,19 @@ Every time when the vocabulary is updated from the new version of BSP RDM, the n
 TODO: the exact url for the context is to be decided.
 
 
+### Approach for Dealing with Semantic Issues 
+
+Exposing the UN/CEFACT vocab openly has allowed a larger community of contributors using advanced tooling to look through the UN/CEFACT semantic model. This has generated a number of issues such as semantic inconsistencies, term duplication, unfortunate naming, etc. These issues are inherited from the upstream semantic model, and the vocab project team discussed how to deal with them, essentially either: 
+1. "Forking" the model by doing a one-off transformation, allowing ourselves to fix the semantic issues directly in the graph. This would allow the team to quickly improve the semantic quality of the vocab, but at the expense of deviating from the source over time; and version incrementing would require significant manual involvement re-applying semantical fixes.
+2. Accept that the vocab has a number of inherited issues, pass back the valuable feedback from the community to the modeling teams and wait for issues to be fixed at the root. Only issued caused by the NDR are considered in project scope to be addressed. 
+
+After thorogh discussion the decision was made to go with the second choice. We will not "fork" the model but stick with a fully automated transformation process - but also a number of inherited semantic issues. The arguments for this decision included:
+- Full alignment to other implementations of the UN/CEFACT model (including semantic issues).
+- Fixing the issues at the root has broader benefits, not only to users of linked data. 
+- Lowering project responsibility; modeling is not what this project is about. 
+- Less work for the project; dealing with a semantic issues is limited to passing feedback upstream. 
+
+
 ### Code list representation
 
 Domain-specific parts of data model may be goverened and published separately, some of these vocabularies are called "codelists". Such vocabularies sometimes have fairly flat and simple organization, for ex. iso-3166 country codes. But others may have quite complex hierarchical structure with additional metadata, for ex. WCO Harmonized System nomenclature. 
