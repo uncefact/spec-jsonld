@@ -62,7 +62,11 @@ public class BSPToJSONLDVocabulary extends Transformer {
             entity.setObjectClassTerm(getStringCellValue(row, 8));
             entity.setPropertyTermQualifier(getStringCellValue(row, 9));
             entity.setPropertyTerm(getStringCellValue(row, 10));
-            entity.setDataTypeQualifier(getStringCellValue(row, 11));
+            if(!getStringCellValue(row, 11).equals("Formatted")) {
+                entity.setDataTypeQualifier(getStringCellValue(row, 11));
+            } else {
+                entity.setDataTypeQualifier("");
+            }
             entity.setRepresentationTerm(getStringCellValue(row, 12));
             entity.setQualifiedDataTypeId(getStringCellValue(row, 13));
             entity.setAssociatedObjectClassTermQualifier(getStringCellValue(row, 14));
