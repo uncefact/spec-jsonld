@@ -540,3 +540,6 @@ Probably the most broadly used vocabulary on the internet. It has overlap on fou
 | uncefact:GeographicalMultiSurface | owl:equivalentClass | sf:MultiSurface |
 
 Considerations on GeoSPARQL are discussed on this ticket: https://github.com/uncefact/vocab/issues/54. 
+
+### LOCODEs
+`https://locode.info/` is an alternative source of LOCODE definitions, as mentioned on https://github.com/uncefact/vocab/issues/28. 
