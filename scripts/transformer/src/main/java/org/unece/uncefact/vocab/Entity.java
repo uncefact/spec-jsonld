@@ -186,11 +186,15 @@ public class Entity {
         return this.propertyTermQualifier.concat(this.propertyTerm);
     }
 
-    public String getPropertyKey(boolean checkTDED) {
-        if (checkTDED)
-            return getPropertyKey();
-        else
-            return StringUtils.join(getPropertyTermWithQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+    public String getPropertyTermWithQualifierForNDRRules() {
+        /**
+         * fix for the issue: https://github.com/uncefact/vocab/issues/48
+         * Identification word is being amended when a representation term is Identifier (which is shortened to Id)
+         */
+        if (StringUtils.equalsIgnoreCase(propertyTerm,"Identification") && StringUtils.equalsIgnoreCase(representationTerm,"Identifier")) {
+            return propertyTermQualifier;
+        }
+        return StringUtils.join(propertyTermQualifier,propertyTerm);
     }
 
     public String getPropertyKey() {
@@ -199,13 +203,13 @@ public class Entity {
 
         if (StringUtils.isBlank(getTDED()) || !codes.contains(getTDED())) {
             if (StringUtils.isBlank(getAssociatedObjectClassTerm())) {
-                return StringUtils.join(getPropertyTermWithQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+                return StringUtils.join(getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
             } else {
-                return StringUtils.join(getPropertyTermWithQualifier(), getRepresentationTermForNDRRules(), getAssociatedObjectClassTerm()).replaceAll(" ", "");
+                return StringUtils.join(getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules(), getAssociatedObjectClassTerm()).replaceAll(" ", "");
             }
         } else {
             if (StringUtils.isBlank(getDataTypeQualifier())) {
-                return StringUtils.join(getObjectClassTermQualifier(), getObjectClassTerm(), getPropertyTermWithQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+                return StringUtils.join(getObjectClassTermQualifier(), getObjectClassTerm(), getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
             } else {
                 if (StringUtils.contains(getDataTypeQualifier(), getPropertyTerm())) {
                     if (StringUtils.equalsIgnoreCase(getDataTypeQualifier(), getPropertyTerm()))
@@ -213,7 +217,7 @@ public class Entity {
                     else
                         return StringUtils.join(getDataTypeQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
                 } else {
-                    return StringUtils.join(getDataTypeQualifier(), getPropertyTermWithQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+                    return StringUtils.join(getDataTypeQualifier(), getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
                 }
             }
         }
