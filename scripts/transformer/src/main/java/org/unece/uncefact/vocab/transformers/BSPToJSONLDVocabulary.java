@@ -107,7 +107,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 JsonObjectBuilder metadata = Json.createObjectBuilder();
                 metadata.add("@id", "cefact:".concat(entity.getName()));
                 metadata.add("@type", "unece:AggregateBIE");
-                metadata.add("unece:cefactUNId", "cefact:".concat(entity.getId()));
+                metadata.add("unece:cefactUNId", entity.getId());
                 metadata.add("rdfs:comment", entity.getDescription());
                 metadata.add("unece:cefactBusinessProcess", entity.getContext());
                 comment.add(entity.getDescription());
