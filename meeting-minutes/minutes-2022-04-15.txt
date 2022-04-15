@@ -1,0 +1,10 @@
+Closing https://github.com/uncefact/vocab/pull/79 without merged
+
+https://github.com/uncefact/vocab/pull/80 - closed
+
+https://github.com/uncefact/vocab/pull/81 - merged
+
+https://github.com/uncefact/vocab/pull/82 - pending, did't produce expected output
+
+Discussion on https://github.com/uncefact/vocab/issues/72
+David to submit all semantic feedback and close tickets
