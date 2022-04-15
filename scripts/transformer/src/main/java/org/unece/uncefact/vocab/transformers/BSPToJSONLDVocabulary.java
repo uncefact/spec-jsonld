@@ -161,7 +161,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     metadata.add("@type", "unece:AssociationBIE");
                     rangeASBIE = entity.getAssociatedObjectClassTerm();
                 }
-                metadata.add("unece:cefactUNId", "cefact:".concat(entity.getId()));
+                metadata.add("unece:cefactUNId", entity.getId());
                 metadata.add("unece:cefactBieDomainClass", "cefact:".concat(entity.getClassKey()));
                 metadata.add("unece:cefactBusinessProcess", entity.getContext());
                 String description = entity.getDescription();
