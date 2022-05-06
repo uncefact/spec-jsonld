@@ -8,7 +8,15 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class Entity {
-    static List<String> codes = Arrays.asList(new String[]{"1001", "1049", "1073", "1153", "1159", "1225", "1227", "1229", "1373", "1501", "1503", "1505", "1507", "2005", "2009", "2013", "2015", "2017", "2023", "2151", "2155", "2379", "2475", "3035", "3045", "3055", "3077", "3079", "3083", "3131", "3139", "3153", "3155", "3227", "3237", "3279", "3285", "3289", "3295", "3299", "3301", "3397", "3401", "3403", "3405", "3455", "3457", "3475", "3477", "3479", "3493", "4017", "4025", "4027", "4035", "4037", "4043", "4049", "4051", "4053", "4055", "4059", "4065", "4071", "4079", "4153", "4183", "4215", "4219", "4221", "4233", "4237", "4277", "4279", "4295", "4343", "4347", "4383", "4401", "4403", "4405", "4407", "4419", "4431", "4435", "4437", "4439", "4447", "4451", "4453", "4455", "4457", "4461", "4463", "4465", "4471", "4475", "4487", "4493", "4499", "4501", "4503", "4505", "4507", "4509", "4511", "4513", "4517", "4525", "5007", "5013", "5025", "5027", "5039", "5047", "5049", "5125", "5153", "5189", "5213", "5237", "5243", "5245", "5249", "5261", "5267", "5273", "5283", "5305", "5307", "5315", "5375", "5379", "5387", "5393", "5419", "5463", "5495", "5501", "6029", "6063", "6069", "6071", "6077", "6079", "6085", "6087", "6113", "6145", "6155", "6167", "6173", "6245", "6311", "6313", "6321", "6331", "6341", "6343", "6347", "6353", "6415", "7001", "7007", "7009", "7011", "7039", "7041", "7045", "7047", "7059", "7073", "7075", "7077", "7081", "7083", "7085", "7111", "7133", "7139", "7143", "7161", "7171", "7173", "7187", "7233", "7273", "7293", "7295", "7297", "7299", "7365", "7383", "7405", "7429", "7431", "7433", "7449", "7451", "7455", "7459", "7491", "7493", "7495", "7497", "7511", "7515", "8015", "8025", "8035", "8051", "8053", "8077", "8101", "8155", "8169", "8179", "8249", "8273", "8281", "8323", "8335", "8339", "8341", "8393", "8395", "8457", "8459", "9003", "9013", "9015", "9017", "9023", "9025", "9029", "9031", "9035", "9037", "9039", "9043", "9045", "9051", "9141", "9143", "9153", "9161", "9169", "9175", "9213", "9285", "9303", "9353", "9411", "9415", "9417", "9421", "9437", "9441", "9443", "9447", "9453", "9501", "9507", "9509", "9601", "9623", "9625", "9635", "9641", "9643", "9645", "9649"});
+    /**
+     * Codes list is being checked and if it TDED of the property exists in it, Data Type is used to generate the JSON LD property name.
+     *
+     * Note for the issue: https://github.com/uncefact/vocab/issues/52
+     * Data type qualifier for properties with TDED 2379 is being ignored (removed from the list).
+     * Because properties with Date Time representation term are expected to be always formatted
+     * and no need to mention it in the property name.
+     */
+    public static List<String> codes = Arrays.asList(new String[]{"1001", "1049", "1073", "1153", "1159", "1225", "1227", "1229", "1373", "1501", "1503", "1505", "1507", "2005", "2009", "2013", "2015", "2017", "2023", "2151", "2155", "2475", "3035", "3045", "3055", "3077", "3079", "3083", "3131", "3139", "3153", "3155", "3227", "3237", "3279", "3285", "3289", "3295", "3299", "3301", "3397", "3401", "3403", "3405", "3455", "3457", "3475", "3477", "3479", "3493", "4017", "4025", "4027", "4035", "4037", "4043", "4049", "4051", "4053", "4055", "4059", "4065", "4071", "4079", "4153", "4183", "4215", "4219", "4221", "4233", "4237", "4277", "4279", "4295", "4343", "4347", "4383", "4401", "4403", "4405", "4407", "4419", "4431", "4435", "4437", "4439", "4447", "4451", "4453", "4455", "4457", "4461", "4463", "4465", "4471", "4475", "4487", "4493", "4499", "4501", "4503", "4505", "4507", "4509", "4511", "4513", "4517", "4525", "5007", "5013", "5025", "5027", "5039", "5047", "5049", "5125", "5153", "5189", "5213", "5237", "5243", "5245", "5249", "5261", "5267", "5273", "5283", "5305", "5307", "5315", "5375", "5379", "5387", "5393", "5419", "5463", "5495", "5501", "6029", "6063", "6069", "6071", "6077", "6079", "6085", "6087", "6113", "6145", "6155", "6167", "6173", "6245", "6311", "6313", "6321", "6331", "6341", "6343", "6347", "6353", "6415", "7001", "7007", "7009", "7011", "7039", "7041", "7045", "7047", "7059", "7073", "7075", "7077", "7081", "7083", "7085", "7111", "7133", "7139", "7143", "7161", "7171", "7173", "7187", "7233", "7273", "7293", "7295", "7297", "7299", "7365", "7383", "7405", "7429", "7431", "7433", "7449", "7451", "7455", "7459", "7491", "7493", "7495", "7497", "7511", "7515", "8015", "8025", "8035", "8051", "8053", "8077", "8101", "8155", "8169", "8179", "8249", "8273", "8281", "8323", "8335", "8339", "8341", "8393", "8395", "8457", "8459", "9003", "9013", "9015", "9017", "9023", "9025", "9029", "9031", "9035", "9037", "9039", "9043", "9045", "9051", "9141", "9143", "9153", "9161", "9169", "9175", "9213", "9285", "9303", "9353", "9411", "9415", "9417", "9421", "9437", "9441", "9443", "9447", "9453", "9501", "9507", "9509", "9601", "9623", "9625", "9635", "9641", "9643", "9645", "9649"});
     String id;
     String type;
     String name;
@@ -194,13 +202,21 @@ public class Entity {
         if (StringUtils.equalsIgnoreCase(propertyTerm,"Identification") && StringUtils.equalsIgnoreCase(representationTerm,"Identifier")) {
             return propertyTermQualifier;
         }
+        /**
+         * fix for the issue: https://github.com/uncefact/vocab/issues/52
+         * If representation term is DateTime the value assumed to be always formatted so no need to include "formatted" word into the property name
+         * We strip it off from property term qualifier
+         */
+        else if (StringUtils.startsWithIgnoreCase(propertyTermQualifier, "Formatted")
+                && StringUtils.equalsIgnoreCase(representationTerm, "DateTime")) {
+            return StringUtils.join(StringUtils.substringAfter(propertyTermQualifier,"Formatted").trim(),propertyTerm);
+        }
+
         return StringUtils.join(propertyTermQualifier,propertyTerm);
     }
 
+    // This gets the name of the object in the JSON LD vocab
     public String getPropertyKey() {
-        /*        return StringUtils.join(getPropertyTerm(), getRepresentationTerm()).replaceAll(" ", "");
-         */
-
         if (StringUtils.isBlank(getTDED()) || !codes.contains(getTDED())) {
             if (StringUtils.isBlank(getAssociatedObjectClassTerm())) {
                 return StringUtils.join(getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
@@ -208,9 +224,11 @@ public class Entity {
                 return StringUtils.join(getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules(), getAssociatedObjectClassTerm()).replaceAll(" ", "");
             }
         } else {
+            // Checking for data type qualifiers
             if (StringUtils.isBlank(getDataTypeQualifier())) {
                 return StringUtils.join(getObjectClassTermQualifier(), getObjectClassTerm(), getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
             } else {
+                // If a data type qualifier is present
                 if (StringUtils.contains(getDataTypeQualifier(), getPropertyTerm())) {
                     if (StringUtils.equalsIgnoreCase(getDataTypeQualifier(), getPropertyTerm()))
                         return StringUtils.join(getObjectClassTermQualifier(), getObjectClassTerm(), getDataTypeQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
