@@ -73,7 +73,7 @@ public class Entity {
     }
 
     public void setObjectClassTermQualifier(String objectClassTermQualifier) {
-        this.objectClassTermQualifier = StringUtils.defaultIfEmpty(objectClassTermQualifier, "");
+        this.objectClassTermQualifier = StringUtils.defaultIfEmpty(objectClassTermQualifier.replaceAll(" ", ""), "");
     }
 
     public String getObjectClassTerm() {
@@ -81,7 +81,7 @@ public class Entity {
     }
 
     public void setObjectClassTerm(String objectClassTerm) {
-        this.objectClassTerm = objectClassTerm;
+        this.objectClassTerm = objectClassTerm.replaceAll(" ", "");
     }
 
     public String getPropertyTermQualifier() {
@@ -89,7 +89,7 @@ public class Entity {
     }
 
     public void setPropertyTermQualifier(String propertyTermQualifier) {
-        this.propertyTermQualifier = StringUtils.defaultIfEmpty(propertyTermQualifier, "");
+        this.propertyTermQualifier = StringUtils.defaultIfEmpty(propertyTermQualifier.replaceAll(" ", ""), "");
         ;
     }
 
@@ -98,7 +98,7 @@ public class Entity {
     }
 
     public void setPropertyTerm(String propertyTerm) {
-        this.propertyTerm = propertyTerm;
+        this.propertyTerm = propertyTerm.replaceAll(" ", "");
     }
 
     public String getDataTypeQualifier() {
@@ -106,7 +106,7 @@ public class Entity {
     }
 
     public void setDataTypeQualifier(String dataTypeQualifier) {
-        this.dataTypeQualifier = dataTypeQualifier;
+        this.dataTypeQualifier = dataTypeQualifier.replaceAll(" ", "");
     }
 
     public String getRepresentationTermForNDRRules() {
@@ -129,7 +129,7 @@ public class Entity {
     }
 
     public void setRepresentationTerm(String representationTerm) {
-        this.representationTerm = representationTerm;
+        this.representationTerm = representationTerm.replaceAll(" ", "");
     }
 
     public String getQualifiedDataTypeId() {
@@ -137,7 +137,7 @@ public class Entity {
     }
 
     public void setQualifiedDataTypeId(String qualifiedDataTypeId) {
-        this.qualifiedDataTypeId = qualifiedDataTypeId;
+        this.qualifiedDataTypeId = qualifiedDataTypeId.replaceAll(" ", "");
     }
 
     public String getAssociatedObjectClassTermQualifier() {
@@ -145,7 +145,7 @@ public class Entity {
     }
 
     public void setAssociatedObjectClassTermQualifier(String associatedObjectClassTermQualifier) {
-        this.associatedObjectClassTermQualifier = StringUtils.defaultIfEmpty(associatedObjectClassTermQualifier, "");
+        this.associatedObjectClassTermQualifier = StringUtils.defaultIfEmpty(associatedObjectClassTermQualifier.replaceAll(" ", ""), "");
         ;
     }
 
@@ -154,7 +154,7 @@ public class Entity {
     }
 
     public void setAssociatedObjectClassTerm(String associatedObjectClassTerm) {
-        this.associatedObjectClassTerm = StringUtils.defaultIfEmpty(associatedObjectClassTerm, "");
+        this.associatedObjectClassTerm = StringUtils.defaultIfEmpty(associatedObjectClassTerm.replaceAll(" ", ""), "");
         ;
     }
 
@@ -217,28 +217,45 @@ public class Entity {
 
     // This gets the name of the object in the JSON LD vocab
     public String getPropertyKey() {
+        String propertyKey = getRepresentationTermForNDRRules();
         if (StringUtils.isBlank(getTDED()) || !codes.contains(getTDED())) {
-            if (StringUtils.isBlank(getAssociatedObjectClassTerm())) {
-                return StringUtils.join(getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
-            } else {
-                return StringUtils.join(getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules(), getAssociatedObjectClassTerm()).replaceAll(" ", "");
+            propertyKey = StringUtils.join(getPropertyTermWithQualifierForNDRRules(), propertyKey);
+            if (!StringUtils.isBlank(getAssociatedObjectClassTerm())) {
+                return StringUtils.join(propertyKey, getAssociatedObjectClassTerm());
             }
         } else {
-            // Checking for data type qualifiers
+            // Checking for data type qualifiers (DTQs)
             if (StringUtils.isBlank(getDataTypeQualifier())) {
-                return StringUtils.join(getObjectClassTermQualifier(), getObjectClassTerm(), getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+                // when the TDED is specified but the DTQ isn't, the object class data is being used to create a meaningful property key
+                propertyKey = filterDuplicatesOut(getObjectClassTermQualifier(), getObjectClassTerm(), getPropertyTermWithQualifierForNDRRules(), propertyKey);
             } else {
-                // If a data type qualifier is present
-                if (StringUtils.contains(getDataTypeQualifier(), getPropertyTerm())) {
-                    if (StringUtils.equalsIgnoreCase(getDataTypeQualifier(), getPropertyTerm()))
-                        return StringUtils.join(getObjectClassTermQualifier(), getObjectClassTerm(), getDataTypeQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
-                    else
-                        return StringUtils.join(getDataTypeQualifier(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+                // If the DTQ is present
+                if (!StringUtils.contains(getDataTypeQualifier(), getPropertyTerm())) {
+                    //if the property term isn't a part of the DTQ, both of them are used
+                    propertyKey = filterDuplicatesOut(getDataTypeQualifier(), getPropertyTermWithQualifierForNDRRules(), propertyKey);
                 } else {
-                    return StringUtils.join(getDataTypeQualifier(), getPropertyTermWithQualifierForNDRRules(), getRepresentationTermForNDRRules()).replaceAll(" ", "");
+                    if (StringUtils.equalsIgnoreCase(getDataTypeQualifier(), getPropertyTerm()))
+                        //if the property term equals to the DTQ, the object class data is being used
+                        //to distinct it from a property with the same key, but no DTQ defined
+                        //check UN01002112 for example
+                        propertyKey = filterDuplicatesOut(getObjectClassTermQualifier(), getObjectClassTerm(), getDataTypeQualifier(), propertyKey);
+                    else
+                        //otherwise use DTQ to distinct properties from ones with the same property term
+                        propertyKey = filterDuplicatesOut(getDataTypeQualifier(), propertyKey);
                 }
             }
         }
+        return propertyKey;
+    }
+
+    static <T> String filterDuplicatesOut(T... elements){
+        String[] array = (String[])elements;
+        String result = array[array.length -1];
+        for (int i = array.length -2; i >=0; i--){
+            if(!StringUtils.startsWithIgnoreCase(result, array[i]))
+                result = StringUtils.join(array[i], result);
+        }
+        return result;
     }
 
     public String getClassKey() {
