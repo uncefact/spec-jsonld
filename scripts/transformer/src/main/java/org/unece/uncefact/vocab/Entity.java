@@ -245,6 +245,15 @@ public class Entity {
                 }
             }
         }
+        //remove duplicated words
+        //TODO: replace with regex implementation
+        String[] split = StringUtils.splitByCharacterTypeCamelCase(propertyKey);
+        propertyKey = split[split.length-1];
+        for (int i = split.length -2; i >=0; i--){
+            if(!StringUtils.startsWithIgnoreCase(propertyKey, split[i]))
+                propertyKey = StringUtils.join(split[i], propertyKey);
+        }
+
         return propertyKey;
     }
 
