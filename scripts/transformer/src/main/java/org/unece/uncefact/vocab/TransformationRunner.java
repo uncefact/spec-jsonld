@@ -20,7 +20,9 @@ public class TransformationRunner {
         Attributes mainAttributes = readProperties();
         String version = mainAttributes.getValue("Implementation-Version");
 
-        Option transformationTypeOption = new Option("t", true, "transformation type. Allowed values: BSP. Default value: BSP.");
+        Option transformationTypeOption = new Option("t", true, "transformation type.\n" +
+                "Allowed values: BSP, REC20.\n" +
+                "Default value: BSP.");
         Option inputFileOption = new Option("i", true, "an input file to be transformed. Accepted format for BSP type is xls. Required.");
         Option outputFileOption = new Option("o", true, "an output file to be created as a result of transformation. Default value: output.jsonld.");
         Option prettyPrintOption = new Option("p", "pretty-print",false, "an output file to be created as a result of transformation. Default value: output.jsonld.");
