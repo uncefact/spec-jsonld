@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.unece.uncefact.vocab.transformers.BSPToJSONLDVocabulary;
+import org.unece.uncefact.vocab.transformers.REC20ToJSONLDVocabulary;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,11 +23,13 @@ public class TransformationRunner {
         Option transformationTypeOption = new Option("t", true, "transformation type. Allowed values: BSP. Default value: BSP.");
         Option inputFileOption = new Option("i", true, "an input file to be transformed. Accepted format for BSP type is xls. Required.");
         Option outputFileOption = new Option("o", true, "an output file to be created as a result of transformation. Default value: output.jsonld.");
+        Option prettyPrintOption = new Option("p", "pretty-print",false, "an output file to be created as a result of transformation. Default value: output.jsonld.");
         Option versionOption = new Option("?", "version", false, "display this help.");
 
         options.addOption(transformationTypeOption);
         options.addOption(inputFileOption);
         options.addOption(outputFileOption);
+        options.addOption(prettyPrintOption);
         options.addOption(versionOption);
 
         HelpFormatter formatter = new HelpFormatter();
@@ -43,6 +46,7 @@ public class TransformationRunner {
 
         String inputFileName = null;
         String outputFileName = "output.jsonld";
+        boolean prettyPrint = false;
         String transformationType = "bsp";
         Transformer transformer = null;
         Iterator<Option> optionIterator = cmd.iterator();
@@ -53,13 +57,18 @@ public class TransformationRunner {
                 inputFileName = option.getValue();
             } else if (opt.equals(outputFileOption.getOpt())) {
                 outputFileName = option.getValue();
+            } else if (opt.equals(prettyPrintOption.getOpt())) {
+                prettyPrint = Boolean.TRUE;
             } else if (opt.equals(transformationTypeOption.getOpt())) {
                 transformationType = option.getValue();
             }
         }
         switch (transformationType.toLowerCase()) {
             case "bsp":
-                transformer = new BSPToJSONLDVocabulary(inputFileName, outputFileName);
+                transformer = new BSPToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
+            case "rec20":
+                transformer = new REC20ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
                 break;
         }
         transformer.transform();
