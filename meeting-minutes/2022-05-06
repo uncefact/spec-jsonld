@@ -1,0 +1,55 @@
+# Meeting Minutes
+
+## Attendees 
+
+Nis Jesperson, Kseniya Shychko, David Roff, Ian Watt
+
+## PR's
+
+Closed Open Pull Request 86
+
+## Issues 
+
+#10 - 
+
+#29 - https://github.com/uncefact/vocab/issues/29
+
+Discussed the locode topic, we have links of data for country and sub division 
+i.e. 
+We have in the vocab https://service.unece.org/trade/uncefact/vocabulary/uncefact/#UNECELOCODE and https://service.unece.org/trade/uncefact/vocabulary/unlocode-au/
+
+This relates to:
+https://service.unece.org/trade/locode/au.htm
+https://unece.org/trade/uncefact/unlocode-country-subdivisions-iso-3166-2
+https://service.unece.org/trade/uncefact/vocabulary/uncefact/#CountrySubDivision
+
+Should the locode have anchors on the page which could be linked to ?
+Should we have those extra data fields on the vocab i.e. sub division? 
+
+Nis has commetned in the ticket to ask valdimir for thoughts
+
+#26 - https://github.com/uncefact/vocab/issues/26
+
+Kseniya will pick this up and review, there is an understanding that if on a low memory machine the page may not load and lead someone to think it is not working.  For most of us this doesn't appear to be an issue.
+
+#27 - https://github.com/uncefact/vocab/issues/27
+
+Links to above comment and shows where there is inconsistency in approach to publish on one page.
+Agree that we will do #26 so this can be closed.
+
+#31 - https://github.com/uncefact/vocab/issues/31
+
+Needs technical support from the UN, constraints are in palce which are blocking.. Raised with Kevin to push in UNECE.  
+Ian Watt to push with secretariat and suggest Maerek also becomes involved to carry this message back.
+
+
+
+
+# Next Meeting 
+
+Next Friday 13th May
+
+Forum is coming up so lets get the PR's in
+
+Nis please close the semantic issues I dont have rights to :) 
+
