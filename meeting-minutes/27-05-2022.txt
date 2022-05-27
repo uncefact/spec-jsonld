@@ -1,0 +1,14 @@
+
+vocab meeting
+May 27th 2022
+
+Forum recap: Townplan
+
+Bureau meeting. Project extension. 
+In order to decide on extension duration, dedicating the meeting to parse through all issues, categorizing what we consider "mandatory for v1" issues. 
+
+12 issued was tagged for v1. Two are done but open pending testing, so in reality 10. 
+We need to account for long deployment period (1 month!). 
+
+Decision to extend with 6 months - even if it should be possible to complete significantly faster. 
+v1 MUST be ready for the next forum, we will not extend beyond Forum 39. This means unresolved issues will be left for a future post-v1 release. 
