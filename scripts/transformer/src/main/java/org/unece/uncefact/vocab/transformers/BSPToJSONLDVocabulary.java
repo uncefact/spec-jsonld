@@ -5,11 +5,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.unece.uncefact.UNType;
 import org.unece.uncefact.vocab.Entity;
 import org.unece.uncefact.vocab.Transformer;
@@ -20,30 +18,51 @@ import java.util.*;
 
 public class BSPToJSONLDVocabulary extends Transformer {
 
-    public BSPToJSONLDVocabulary(String inputFile, String outputFile) {
-        super(inputFile, outputFile);
+    protected static String BBIE = "BBIE";
+    protected static String ABIE = "ABIE";
+    protected static String ASBIE = "ASBIE";
+    protected static String SCHEMA_NS = "schema";
+    protected static String SCHEMA_DOMAIN_INCLUDES = SCHEMA_NS+":domainIncludes";
+    protected static String SCHEMA_RANGE_INCLUDES = SCHEMA_NS+":rangeIncludes";
+    protected static String UNECE_ABIE = UNECE_NS+":AggregateBIE";
+    protected static String UNECE_BBIE = UNECE_NS+":BasicBIE";
+    protected static String UNECE_ASBIE = UNECE_NS+":AssociationBIE";
+    protected static String UNECE_TDED = UNECE_NS+":TDED";
+    protected static String UNECE_STATUS = UNECE_NS+":status";
+    protected static String UNECE_CEFACT_UN_ID = UNECE_NS+":cefactUNId";
+    protected static String UNECE_CEFACT_BUSINESS_PROCESS = UNECE_NS+":cefactBusinessProcess";
+    protected static String UNECE_CEFACT_ELEMENT_METADATA = UNECE_NS+":cefactElementMetadata";
+    protected static String UNECE_CEFACT_BIE_DOMAIN_CLASS = UNECE_NS+":cefactBieDomainClass";
+
+    public BSPToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
+        super(inputFile, outputFile,prettyPrint);
+
+        contextObjectBuilder.add(SCHEMA_NS, "http://schema.org/");
+        contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/trade/uncefact/vocabulary/unece#");
+        contextObjectBuilder.add(CEFACT_NS, "https://edi3.org/cefact#");
+        contextObjectBuilder.add(XSD_NS, "http://www.w3.org/2001/XMLSchema#");
     }
 
-    public void transform() throws IOException, InvalidFormatException {
+    public void readInputFileToGraphArray(final Workbook workbook){
 
         Map<String, String> accsMap = new TreeMap<String, String>();
         InputStream in = getClass().getResourceAsStream("/accs.csv");
         Reader reader = new BufferedReader(new InputStreamReader(in));
-        CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT);
+        CSVParser csvParser = null;
+        try {
+            csvParser = new CSVParser(reader, CSVFormat.DEFAULT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         for (CSVRecord csvRecord : csvParser) {
             String accs = csvRecord.get(0).replaceAll(" ", "");
             String desc = csvRecord.get(1);
             accsMap.put(accs, desc);
         }
 
-        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        JsonObjectBuilder contextObjectBuilder = Json.createObjectBuilder();
-        JsonArrayBuilder graphJsonArrayBuilder = Json.createArrayBuilder();
-
-        Workbook workbook = WorkbookFactory.create(new File(inputFile));
         Sheet sheet = workbook.getSheetAt(0);
         Iterator<Row> rowIterator = sheet.rowIterator();
-
+        // skip the table header - the first five rows
         for (int i = 0; i < 5; i++) {
             rowIterator.next();
         }
@@ -72,20 +91,20 @@ public class BSPToJSONLDVocabulary extends Transformer {
             }
             entity.setTDED(getStringCellValue(row, 70));
         }
-        Map<String, Set<Entity>> classesMap = new TreeMap<String, Set<Entity>>();
-        Map<String, Set<Entity>> propertiesMap = new TreeMap<String, Set<Entity>>();
+        Map<String, Set<Entity>> classesMap = new TreeMap<>();
+        Map<String, Set<Entity>> propertiesMap = new TreeMap<>();
         for (Entity entity : vocabulary.values()) {
             if (entity.getType() == null) {
                 entity.getName();
-            } else if (entity.getType().equalsIgnoreCase("ABIE")) {
-                Set<Entity> entities = new HashSet<Entity>();
+            } else if (entity.getType().equalsIgnoreCase(ABIE)) {
+                Set<Entity> entities = new HashSet<>();
                 if (classesMap.containsKey(entity.getObjectClassTerm())) {
                     entities = classesMap.get(entity.getObjectClassTerm());
                 }
                 entities.add(entity);
                 classesMap.put(entity.getObjectClassTerm(), entities);
-            } else if (entity.getType().equalsIgnoreCase("BBIE") || entity.getType().equalsIgnoreCase("ASBIE")) {
-                Set<Entity> entities = new HashSet<Entity>();
+            } else if (entity.getType().equalsIgnoreCase(BBIE) || entity.getType().equalsIgnoreCase(ASBIE)) {
+                Set<Entity> entities = new HashSet<>();
                 String key = entity.getPropertyKey();
                 key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key);
                 if (propertiesMap.containsKey(key)) {
@@ -100,76 +119,76 @@ public class BSPToJSONLDVocabulary extends Transformer {
             JsonArrayBuilder metadataJsonArrayBuilder = Json.createArrayBuilder();
             String id = key;
             Set<Entity> entities = classesMap.get(key);
-            HashSet<String> comment = new HashSet<String>();
+            HashSet<String> comment = new HashSet<>();
             for (Entity entity : entities) {
                 JsonObjectBuilder metadata = Json.createObjectBuilder();
-                metadata.add("@id", "cefact:".concat(entity.getName()));
-                metadata.add("@type", "unece:AggregateBIE");
-                metadata.add("unece:cefactUNId", entity.getId());
-                metadata.add("rdfs:comment", entity.getDescription());
-                metadata.add("unece:cefactBusinessProcess", entity.getContext());
+                metadata.add(ID, StringUtils.join(CEFACT_NS,":",entity.getName()));
+                metadata.add(TYPE, UNECE_ABIE);
+                metadata.add(UNECE_CEFACT_UN_ID, entity.getId());
+                metadata.add(RDFS_COMMENT, entity.getDescription());
+                metadata.add(UNECE_CEFACT_BUSINESS_PROCESS, entity.getContext());
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
             }
 
             JsonObjectBuilder rdfClass = Json.createObjectBuilder();
-            rdfClass.add("@id", "unece:".concat(id));
-            rdfClass.add("@type", "rdfs:Class");
+            rdfClass.add(ID, StringUtils.join(UNECE_NS,":",id));
+            rdfClass.add(TYPE, RDFS_CLASS);
             if (accsMap.containsKey(id)) {
-                rdfClass.add("rdfs:comment", accsMap.get(id));
+                rdfClass.add(RDFS_COMMENT, accsMap.get(id));
 
             } else if (comment.size() == 1) {
-                rdfClass.add("rdfs:comment", comment.iterator().next());
+                rdfClass.add(RDFS_COMMENT, comment.iterator().next());
             } else {
                 JsonArrayBuilder commentJsonArrayBuilder = Json.createArrayBuilder();
                 for (String commentValue : comment) {
                     commentJsonArrayBuilder.add(commentValue);
                 }
-                rdfClass.add("rdfs:comment", commentJsonArrayBuilder.build());
+                rdfClass.add(RDFS_COMMENT, commentJsonArrayBuilder.build());
 
             }
-            rdfClass.add("rdfs:label", id);
-            rdfClass.add("unece:cefactElementMetadata", metadataJsonArrayBuilder.build());
+            rdfClass.add(RDFS_LABEL, id);
+            rdfClass.add(UNECE_CEFACT_ELEMENT_METADATA, metadataJsonArrayBuilder.build());
             graphJsonArrayBuilder.add(rdfClass);
         }
 
         for (String key : propertiesMap.keySet()) {
             String id = key;
             JsonObjectBuilder rdfProperty = Json.createObjectBuilder();
-            rdfProperty.add("@id", "unece:".concat(id));
-            rdfProperty.add("@type", "rdf:Property");
+            rdfProperty.add(ID, StringUtils.join(UNECE_NS,":",id));
+            rdfProperty.add(TYPE, RDF_PROPERTY);
 
             JsonArrayBuilder metadataJsonArrayBuilder = Json.createArrayBuilder();
             Set<Entity> entities = propertiesMap.get(key);
             String rangeBBIE = null;
             String rangeASBIE = null;
-            TreeSet<String> domain = new TreeSet<String>();
-            TreeSet<String> comment = new TreeSet<String>();
-            TreeSet<String> tded = new TreeSet<String>();
+            TreeSet<String> domain = new TreeSet<>();
+            TreeSet<String> comment = new TreeSet<>();
+            TreeSet<String> tded = new TreeSet<>();
             for (Entity entity : entities) {
                 JsonObjectBuilder metadata = Json.createObjectBuilder();
-                metadata.add("@id", "cefact:".concat(entity.getName()));
-                if (entity.getType().equalsIgnoreCase("BBIE")) {
-                    metadata.add("@type", "unece:BasicBIE");
+                metadata.add(ID, StringUtils.join(CEFACT_NS,":",entity.getName()));
+                if (entity.getType().equalsIgnoreCase(BBIE)) {
+                    metadata.add(TYPE, UNECE_BBIE);
                     rangeBBIE = entity.getRepresentationTerm();
                     if (StringUtils.isNotBlank(entity.getTDED())) {
-                        metadata.add("unece:TDED", entity.getTDED());
+                        metadata.add(UNECE_TDED, entity.getTDED());
                     }
-                } else if (entity.getType().equalsIgnoreCase("ASBIE")) {
-                    metadata.add("@type", "unece:AssociationBIE");
+                } else if (entity.getType().equalsIgnoreCase(ASBIE)) {
+                    metadata.add(TYPE, UNECE_ASBIE);
                     rangeASBIE = entity.getAssociatedObjectClassTerm();
                 }
-                metadata.add("unece:cefactUNId", entity.getId());
-                metadata.add("unece:cefactBieDomainClass", "cefact:".concat(entity.getClassKey()));
-                metadata.add("unece:cefactBusinessProcess", entity.getContext());
+                metadata.add(UNECE_CEFACT_UN_ID, entity.getId());
+                metadata.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, StringUtils.join(CEFACT_NS,":",entity.getClassKey()));
+                metadata.add(UNECE_CEFACT_BUSINESS_PROCESS, entity.getContext());
                 String description = entity.getDescription();
                 String publicationComment = entity.getPublicationComment();
                 if (StringUtils.isNotBlank(publicationComment)) {
                     description = description.concat(" ").concat(publicationComment);
                 }
-                metadata.add("rdfs:comment", description);
+                metadata.add(RDFS_COMMENT, description);
                 if (publicationComment.startsWith("Deprecated")) {
-                    metadata.add("unece:status", "deprecated");
+                    metadata.add(UNECE_STATUS, "deprecated");
                 }
                 domain.add(entity.getObjectClassTerm());
                 comment.add(entity.getDescription());
@@ -187,166 +206,39 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 }
                 Object rangeIncludes = getData(rangeBBIE, tded);
                 if (rangeIncludes instanceof JsonObjectBuilder) {
-                    rdfProperty.add("schema:rangeIncludes", (JsonObjectBuilder) rangeIncludes);
+                    rdfProperty.add(SCHEMA_RANGE_INCLUDES, (JsonObjectBuilder) rangeIncludes);
                 } else {
-                    rdfProperty.add("schema:rangeIncludes", (JsonArrayBuilder) rangeIncludes);
+                    rdfProperty.add(SCHEMA_RANGE_INCLUDES, (JsonArrayBuilder) rangeIncludes);
                 }
             } else {
-                rdfProperty.add("schema:rangeIncludes", Json.createObjectBuilder().add("@id", "unece:".concat(rangeASBIE)));
+                rdfProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder().add(ID, StringUtils.join(UNECE_NS,":",rangeASBIE)));
             }
             if (domain.size() == 1) {
-                rdfProperty.add("schema:domainIncludes", Json.createObjectBuilder().add("@id", "unece:".concat(domain.iterator().next())));
+                rdfProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder().add(ID, StringUtils.join(UNECE_NS,":",domain.iterator().next())));
             } else {
                 JsonArrayBuilder domainJsonArrayBuilder = Json.createArrayBuilder();
                 for (String domainName : domain) {
-                    domainJsonArrayBuilder.add(Json.createObjectBuilder().add("@id", "unece:".concat(domainName)));
+                    domainJsonArrayBuilder.add(Json.createObjectBuilder().add(ID, StringUtils.join(UNECE_NS,":",domainName)));
                 }
-                rdfProperty.add("schema:domainIncludes", domainJsonArrayBuilder.build());
+                rdfProperty.add(SCHEMA_DOMAIN_INCLUDES, domainJsonArrayBuilder.build());
 
             }
             if (comment.size() == 1) {
-                rdfProperty.add("rdfs:comment", comment.iterator().next());
+                rdfProperty.add(RDFS_COMMENT, comment.iterator().next());
             } else {
                 JsonArrayBuilder commentJsonArrayBuilder = Json.createArrayBuilder();
                 for (String commentValue : comment) {
                     commentJsonArrayBuilder.add(commentValue);
                 }
-                rdfProperty.add("rdfs:comment", commentJsonArrayBuilder.build());
-
+                rdfProperty.add(RDFS_COMMENT, commentJsonArrayBuilder.build());
             }
-            rdfProperty.add("rdfs:label", id);
-            rdfProperty.add("unece:cefactElementMetadata", metadataJsonArrayBuilder.build());
+            rdfProperty.add(RDFS_LABEL, id);
+            rdfProperty.add(UNECE_CEFACT_ELEMENT_METADATA, metadataJsonArrayBuilder.build());
             graphJsonArrayBuilder.add(rdfProperty);
         }
-
-
-        contextObjectBuilder.add("schema", "http://schema.org/");
-        contextObjectBuilder.add("unece", "https://service.unece.org/trade/uncefact/trade/uncefact/vocabulary/unece#");
-        contextObjectBuilder.add("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        contextObjectBuilder.add("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-        contextObjectBuilder.add("cefact", "https://edi3.org/cefact#");
-        contextObjectBuilder.add("xsd", "http://www.w3.org/2001/XMLSchema#");
-        contextObjectBuilder.add("dc", "http://purl.org/dc/elements/1.1/");
-
-        jsonObjectBuilder.add("@context", contextObjectBuilder.build());
-        jsonObjectBuilder.add("@graph", graphJsonArrayBuilder.build());
-        PrintWriter writer = null;
-        try {
-            writer = new PrintWriter(outputFile, "UTF-8");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        JsonObject jsonObject = jsonObjectBuilder.build();
-        writer.print(jsonObject);
-        writer.close();
-
-
-        Map<String, List<JsonObject>> bbieMapForMd = new HashMap<String, List<JsonObject>>();
-        Map<String, List<JsonObject>> asbieMapForMd = new HashMap<String, List<JsonObject>>();
-        Map<String, Set<String>> rangeMapForMd = new HashMap<String, Set<String>>();
-        JsonArray graph = jsonObject.getJsonArray("@graph");
-
-
-        for (int i = 0; i < graph.size(); i++) {
-            JsonObject graphItem = graph.getJsonObject(i);
-
-            String type = graphItem.getString("@type");
-            if (type.equalsIgnoreCase("rdf:Property")) {
-                TreeSet<String> rangeIncludes = new TreeSet<>();
-                JsonValue jsonValue = graphItem.get("schema:rangeIncludes");
-                if (jsonValue instanceof JsonObject) {
-                    rangeIncludes.add(((JsonObject) jsonValue).getString("@id"));
-                } else {
-                    JsonArray jsonArray = (JsonArray) jsonValue;
-                    for (int j = 0; j < jsonArray.size(); j++) {
-                        rangeIncludes.add(jsonArray.getJsonObject(j).getString("@id"));
-                    }
-                }
-                for (String rdfsRange : rangeIncludes) {
-                    if (rdfsRange.startsWith("unece:")) {
-                        String range = StringUtils.substringAfter(rdfsRange, "unece:");
-                        String id = StringUtils.substringAfter(graphItem.getString("@id"), "unece:");
-                        Set<String> ranges = rangeMapForMd.get(range);
-                        if (ranges == null) {
-                            ranges = new TreeSet<String>();
-                        }
-                        ranges.add(id);
-                        rangeMapForMd.put(range, ranges);
-                        JsonValue domainObject = graphItem.get("schema:domainIncludes");
-                        if (domainObject instanceof JsonArray) {
-                            JsonArray domains = (JsonArray) domainObject;
-                            for (int j = 0; j < domains.size(); j++) {
-                                String domain = domains.getJsonObject(j).getString("@id");
-                                List<JsonObject> items = asbieMapForMd.get(domain);
-                                if (items == null) {
-                                    items = new ArrayList<JsonObject>();
-                                }
-                                items.add(graphItem);
-                                asbieMapForMd.put(domain, items);
-                            }
-
-                        } else if (domainObject instanceof JsonObject) {
-                            String domain = ((JsonObject) domainObject).getString("@id");
-                            List<JsonObject> items = asbieMapForMd.get(domain);
-                            if (items == null) {
-                                items = new ArrayList<JsonObject>();
-                            }
-                            items.add(graphItem);
-                            asbieMapForMd.put(domain, items);
-                        }
-                    } else {
-                        JsonValue domainObject = graphItem.get("schema:domainIncludes");
-                        if (domainObject instanceof JsonArray) {
-                            JsonArray domains = (JsonArray) domainObject;
-                            for (int j = 0; j < domains.size(); j++) {
-                                String domain = domains.getJsonObject(j).getString("@id");
-                                List<JsonObject> items = bbieMapForMd.get(domain);
-                                if (items == null) {
-                                    items = new ArrayList<JsonObject>();
-                                } else {
-                                }
-                                items.add(graphItem);
-                                bbieMapForMd.put(domain, items);
-                            }
-
-                        } else if (domainObject instanceof JsonString) {
-                            String domain = ((JsonObject) domainObject).getString("@id");
-                            List<JsonObject> items = bbieMapForMd.get(domain);
-                            if (items == null) {
-                                items = new ArrayList<JsonObject>();
-                            }
-                            items.add(graphItem);
-                            bbieMapForMd.put(domain, items);
-                        }
-                    }
-                }
-            }
-        }
-        writer.close();
     }
 
-    static String getStringCellValue(Row row, int cellNumber) {
-        return getStringCellValue(row, cellNumber, true);
-    }
-
-    static String getStringCellValue(Row row, int cellNumber, boolean cleanup) {
-        if (row.getCell(cellNumber) != null) {
-            String result = row.getCell(cellNumber).getStringCellValue();
-            if (cleanup) {
-                return cleanUp(result);
-            }
-            return StringUtils.defaultIfEmpty(result, "");
-        }
-        return "";
-    }
-
-    static String cleanUp(String attribute) {
-        return attribute.replaceAll(" ", "").replaceAll("_", "").replaceAll("-", "").replaceAll("/", "")/*.replaceAll(".","")*/;
-    }
-
-    static Object getData(String dataType, Set<String> TDED) {
+    Object getData(String dataType, Set<String> TDED) {
         JsonObjectBuilder result = Json.createObjectBuilder();
         TreeSet<String> filteredTDED = new TreeSet<>();
         for (String item : TDED) {
@@ -363,11 +255,11 @@ public class BSPToJSONLDVocabulary extends Transformer {
         if (filteredTDED.size() != 0) {
             if (filteredTDED.size() == 1) {
                 String item = String.format("unece:UNECECL%sCode", filteredTDED.iterator().next());
-                return result.add("@id", item);
+                return result.add(ID, item);
             } else {
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 for (String item : filteredTDED) {
-                    arrayBuilder.add(Json.createObjectBuilder().add("@id", String.format("unece:UNECECL%sCode", item)));
+                    arrayBuilder.add(Json.createObjectBuilder().add(ID, String.format("unece:UNECECL%sCode", item)));
                 }
                 return arrayBuilder;
             }
@@ -376,20 +268,21 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 UNType unType = UNType.valueOf(dataType.toUpperCase());
                 switch (unType) {
                     case INDICATOR:
-                        result = result.add("@id", "xsd:boolean");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","boolean"));
                         break;
                     case IDENTIFIER:
                     case ID:
                     case CODE:
-                        result = result.add("@id", "xsd:token");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","token"));
                         break;
                     case TEXT:
                     case VALUE:
                     case TYPE:
-                        result = result.add("@id", "xsd:string");
+                    default:
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","string"));
                         break;
                     case DATETIME:
-                        result = result.add("@id", "xsd:dateTime");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","dateTime"));
                         break;
                     case AMOUNT:
                     case PERCENT:
@@ -397,31 +290,28 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     case QUANTITY:
                     case NUMERIC:
                     case MEASURE:
-                        result = result.add("@id", "xsd:decimal");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","decimal"));
                         break;
                     case DATE:
-                        result = result.add("@id", "xsd:date");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","date"));
                     case BINARYOBJECT:
                     case GRAPHIC:
                     case PICTURE:
                     case VIDEO:
                     case SOUND:
-                        result = result.add("@id", "xsd:base64Binary");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","base64Binary"));
                         break;
                     case TIME:
-                        result = result.add("@id", "xsd:time");
-                        break;
-                    default:
-                        result = result.add("@id", "xsd:string");
+                        result = result.add(ID, StringUtils.join(XSD_NS,":","time"));
                         break;
                 }
 
             } catch (IllegalArgumentException e) {
                 System.out.println(String.format("Check data type %s", dataType));
                 if (dataType.equalsIgnoreCase("Id"))
-                    result = result.add("@id", "xsd:token");
+                    result = result.add(ID, StringUtils.join(XSD_NS,":","token"));
                 else
-                    result = result.add("@id", "xsd:string");
+                    result = result.add(ID, StringUtils.join(XSD_NS,":","string"));
             }
         }
         return result;
