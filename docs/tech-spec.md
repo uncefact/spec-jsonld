@@ -157,7 +157,8 @@ It has been agreed that the scope will NOT cover
 ## Deliverables 
 
 1. A PDF / Word document which covers the project lifecycle including; Public Review logs and Final document ready for official publication.
-2. Code in the UN/CEFACT GitHub to deliver the published & maintained JSON-LD vocabulary
+2. Code in the UN/CEFACT GitHub (https://github.com/uncefact/vocab) to produce the JSON-LD vocabulary outputs
+3. Delivery of an official and maintained release of the JSON-LD vocabulary published on the UNECE website (https://service.unece.org/trade/uncefact/vocabulary/uncefact.jsonld)
 
 
 ## Maintenance
