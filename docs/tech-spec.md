@@ -1,7 +1,7 @@
 # UN/CEFACT JSON-LD Web Vocabulary - Technical Specification
 
 ## Abstract
-UN/CEFACT's vocabulary, supporting modern technology
+Emerging technologies depend upon common semantics in order to acheive scalability, when these semantics are managed as web vocabularies and each term has a specific meaning it can be composed dynamically in any order, in this world the dictionary is more important than the document.  The aim of this project is to publish the UN/CEFACT's vocabulary as JSON-LD creating a semantic anchor for supply chain standards, including all classes, properties and code lists.
 
 
 ## Introduction
@@ -178,7 +178,7 @@ Issues relating specifically to the production of the JSON-LD would be managed i
 
 This specification is part of a suite of documents that collectively provids the neccessary tools and methods for data modellers to produce high quality API designs based on UN/CEFACT semantics.
 
-The UN/CEFACT vocabulary is currently published as a CSV file (the reference data models) and variously as CSV, XML, PDF or HTML (the code lists).  The core piurpose of this specification is to define the naming and design rules for consistent publishing of both the reference data models and code lists as JSON-LD vocuabularies. This is the foundation specification that makes UN/CEFACT semantics accessible and consumable for web developers. This specification will have achieved it’s purpose when UN semantics are published and consumable in a similar way to other well established vocabularies such as schema.org.  
+The UN/CEFACT vocabulary is currently published as a CSV file (the reference data models) and variously as CSV, XML, PDF or HTML (the code lists).  The core purpose of this specification is to define the naming and design rules for consistent publishing of both the reference data models and code lists as JSON-LD vocuabularies. This is the foundation specification that makes UN/CEFACT semantics accessible and consumable for web developers. This specification will have achieved it’s purpose when UN semantics are published and consumable in a similar way to other well established vocabularies such as schema.org.  
 
 Within this primary goal, there are several more detailed requirements
 
