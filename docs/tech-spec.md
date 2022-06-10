@@ -247,7 +247,8 @@ TODO: The formal process of assigning the business domain to the vocabulary term
 
 ### Versioning
 
-The vocabulary is updated every 6 months, following the maintainance cycle of the CEFACT BSP RDM.
+The vocabulary is officially updated twice a year, every 6 months, following the maintainance cycle of the CEFACT BSP RDM.  These releases will be tagged in the repository to show stable versions.
+
 Each BIE is annotated with the date when it was created, current active\deprecated status, and the date of deprecation.
 
 ```json
