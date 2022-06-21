@@ -82,11 +82,19 @@ public abstract class Transformer {
     protected abstract void readInputFileToGraphArray(Workbook workbook);
 
     protected String getCellValue(Row row, int cellNumber) {
+       return getCellValue(row, cellNumber, false);
+    }
+
+    protected String getCellValue(Row row, int cellNumber, boolean convertToInteger) {
         Object result = null;
         if (row.getCell(cellNumber) != null) {
             switch (row.getCell(cellNumber).getCellTypeEnum()) {
                 case NUMERIC:
-                    result = row.getCell(cellNumber).getNumericCellValue();
+                    double value = row.getCell(cellNumber).getNumericCellValue();
+                    if(convertToInteger)
+                        result = Integer.valueOf((int) value);
+                    else
+                        result = value;
                     break;
                 case STRING:
                     result = row.getCell(cellNumber).getStringCellValue();
