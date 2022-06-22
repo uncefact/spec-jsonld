@@ -4,12 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.*;
 import java.util.*;
 
-public class REC20ToJSONLDVocabulary extends Transformer {
+public class REC20ToJSONLDVocabulary extends WorkBookTransformer {
     protected static String REC20_NS = "rec20";
 
     public REC20ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
@@ -18,7 +17,8 @@ public class REC20ToJSONLDVocabulary extends Transformer {
         contextObjectBuilder.add(REC20_NS, "https://service.unece.org/trade/uncefact/vocabulary/uncefact/rec20#");
     }
 
-    public void readInputFileToGraphArray(final Workbook workbook){
+    public void readInputFileToGraphArray(final Object object) {
+        Workbook workbook = (Workbook) object;
         Sheet sheet = workbook.getSheetAt(2);
         Iterator<Row> rowIterator = sheet.rowIterator();
 

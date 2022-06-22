@@ -79,6 +79,9 @@ public class TransformationRunner {
             case "rec28":
                 transformer = new REC28ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
                 break;
+            case "uncl":
+                transformer = new UNCLToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
         }
         transformer.transform();
     }

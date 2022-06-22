@@ -5,10 +5,14 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.unece.uncefact.vocab.transformers.UNCLToJSONLDVocabulary;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +32,7 @@ public abstract class Transformer {
     protected String inputFile;
     protected String outputFile;
 
-    private boolean prettyPrint = Boolean.TRUE;
+    private boolean prettyPrint;
 
     protected JsonObject context;
 
@@ -43,43 +47,26 @@ public abstract class Transformer {
         this.prettyPrint = prettyPrint;
 
         jsonObjectBuilder = Json.createObjectBuilder();
-        contextObjectBuilder = Json.createObjectBuilder();
         graphJsonArrayBuilder = Json.createArrayBuilder();
 
+        setContext();
+
+    }
+
+    protected void setContext (){
+        contextObjectBuilder = Json.createObjectBuilder();
         //common context for all vocabularies
         contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/trade/uncefact/vocabulary/unece#");
         contextObjectBuilder.add(RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         contextObjectBuilder.add(RDFS_NS, "http://www.w3.org/2000/01/rdf-schema#");
-
     }
 
     public void transform() throws IOException, InvalidFormatException {
-        Workbook workbook = WorkbookFactory.create(new File(inputFile));
-        readInputFileToGraphArray(workbook);
-
-        jsonObjectBuilder.add("@context", contextObjectBuilder.build());
-        jsonObjectBuilder.add("@graph", graphJsonArrayBuilder.build());
-
-        Map<String, Boolean> config = new HashMap<>();
-        if (this.prettyPrint) {
-            config.put(JsonGenerator.PRETTY_PRINTING, true);
-        }
-        StringWriter stringWriter = new StringWriter();
-        JsonWriterFactory writerFactory = Json.createWriterFactory(config);
-        ;
-        try (JsonWriter jsonWriter = writerFactory.createWriter(stringWriter)) {
-            jsonWriter.writeObject(jsonObjectBuilder.build());
-        }
-        try (PrintWriter writer =  new PrintWriter(outputFile, "UTF-8")){
-            writer.print(stringWriter);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        FileGenerator fileGenerator = new FileGenerator();
+        fileGenerator.generateFile(contextObjectBuilder, graphJsonArrayBuilder, this.prettyPrint, outputFile);
     }
 
-    protected abstract void readInputFileToGraphArray(Workbook workbook);
+    protected abstract void readInputFileToGraphArray(Object object);
 
     protected String getCellValue(Row row, int cellNumber) {
        return getCellValue(row, cellNumber, false);

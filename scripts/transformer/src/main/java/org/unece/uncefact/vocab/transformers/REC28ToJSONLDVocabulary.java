@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -12,7 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class REC28ToJSONLDVocabulary extends Transformer {
+public class REC28ToJSONLDVocabulary extends WorkBookTransformer {
     protected static String REC28_NS = "rec28";
 
     public REC28ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
@@ -21,7 +20,8 @@ public class REC28ToJSONLDVocabulary extends Transformer {
         contextObjectBuilder.add(REC28_NS, "https://service.unece.org/trade/uncefact/vocabulary/uncefact/rec28#");
     }
 
-    public void readInputFileToGraphArray(final Workbook workbook){
+    public void readInputFileToGraphArray(final Object object) {
+        Workbook workbook = (Workbook) object;
         Sheet sheet = workbook.getSheetAt(0);
         Iterator<Row> rowIterator = sheet.rowIterator();
 
