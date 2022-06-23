@@ -10,13 +10,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.unece.uncefact.UNType;
 import org.unece.uncefact.vocab.Entity;
-import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.*;
 import java.io.*;
 import java.util.*;
 
-public class BSPToJSONLDVocabulary extends Transformer {
+public class BSPToJSONLDVocabulary extends WorkBookTransformer {
 
     protected static String BBIE = "BBIE";
     protected static String ABIE = "ABIE";
@@ -43,7 +42,8 @@ public class BSPToJSONLDVocabulary extends Transformer {
         contextObjectBuilder.add(XSD_NS, "http://www.w3.org/2001/XMLSchema#");
     }
 
-    public void readInputFileToGraphArray(final Workbook workbook){
+    public void readInputFileToGraphArray(final Object object) {
+        Workbook workbook = (Workbook) object;
 
         Map<String, String> accsMap = new TreeMap<String, String>();
         InputStream in = getClass().getResourceAsStream("/accs.csv");

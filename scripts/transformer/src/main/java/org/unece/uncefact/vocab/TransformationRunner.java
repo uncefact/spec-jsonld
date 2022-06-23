@@ -3,12 +3,10 @@ package org.unece.uncefact.vocab;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.unece.uncefact.vocab.transformers.BSPToJSONLDVocabulary;
-import org.unece.uncefact.vocab.transformers.REC20ToJSONLDVocabulary;
+import org.unece.uncefact.vocab.transformers.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -71,6 +69,18 @@ public class TransformationRunner {
                 break;
             case "rec20":
                 transformer = new REC20ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
+            case "rec21":
+                transformer = new REC21ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
+            case "rec24":
+                transformer = new REC24ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
+            case "rec28":
+                transformer = new REC28ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
+            case "uncl":
+                transformer = new UNCLToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
                 break;
         }
         transformer.transform();
