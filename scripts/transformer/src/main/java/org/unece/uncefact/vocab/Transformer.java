@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class Transformer {
     protected static String ID = "@id";
@@ -30,6 +31,7 @@ public abstract class Transformer {
     protected static String RDFS_COMMENT = RDFS_NS+":comment";
     protected static String RDFS_LABEL = RDFS_NS+":label";
     protected String inputFile;
+    protected Set<String> inputFiles;
     protected String outputFile;
 
     private boolean prettyPrint;
@@ -56,7 +58,7 @@ public abstract class Transformer {
     protected void setContext (){
         contextObjectBuilder = Json.createObjectBuilder();
         //common context for all vocabularies
-        contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/trade/uncefact/vocabulary/unece#");
+        contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unece#");
         contextObjectBuilder.add(RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         contextObjectBuilder.add(RDFS_NS, "http://www.w3.org/2000/01/rdf-schema#");
     }
@@ -115,5 +117,9 @@ public abstract class Transformer {
 
     protected String cleanUp(String attribute) {
         return attribute.replaceAll(" ", "").replaceAll("_", "").replaceAll("-", "").replaceAll("/", "")/*.replaceAll(".","")*/;
+    }
+
+    protected void setInputFiles(Set<String> inputFiles){
+        this.inputFiles = inputFiles;
     }
 }
