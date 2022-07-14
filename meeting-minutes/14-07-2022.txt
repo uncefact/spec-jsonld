@@ -1,0 +1,20 @@
+CEFACT July 14 
+
+Focus on Issue #63 
+
+https://github.com/uncefact/spec-jsonld/pull/96
+This will require some discussion. Will not merge without David on the call. 
+https://github.com/uncefact/spec-jsonld/pull/96/files#diff-7f9d6d5081e281f48ab9ecc24d5b394423eb41f81fc15835f95c53002a2f8887R168
+
+https://github.com/uncefact/spec-jsonld/pull/104
+Minutes
+
+https://github.com/uncefact/spec-jsonld/pull/105
+Discussed:
+- subdivisions
+- special characteristics
+More work needed, will revisit next meeting
+
+https://github.com/uncefact/spec-jsonld/pull/106
+Discussion on whether to squash all qualifiers terms into common classes, or keeping them separate (except "referenced" ones). 
+Decission on the latter: keep them separate. 
