@@ -35,11 +35,17 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
 
     public BSPToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile,prettyPrint);
+    }
+
+    protected void setContext (){
+        super.setContext();
 
         contextObjectBuilder.add(SCHEMA_NS, "http://schema.org/");
-        contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/trade/uncefact/vocabulary/unece#");
         contextObjectBuilder.add(CEFACT_NS, "https://edi3.org/cefact#");
         contextObjectBuilder.add(XSD_NS, "http://www.w3.org/2001/XMLSchema#");
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        objectBuilder.add(TYPE, ID);
+        contextObjectBuilder.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, objectBuilder.build());
     }
 
     public void readInputFileToGraphArray(final Object object) {

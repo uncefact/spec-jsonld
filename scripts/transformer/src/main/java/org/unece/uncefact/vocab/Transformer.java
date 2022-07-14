@@ -56,7 +56,7 @@ public abstract class Transformer {
     protected void setContext (){
         contextObjectBuilder = Json.createObjectBuilder();
         //common context for all vocabularies
-        contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/trade/uncefact/vocabulary/unece#");
+        contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unece#");
         contextObjectBuilder.add(RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         contextObjectBuilder.add(RDFS_NS, "http://www.w3.org/2000/01/rdf-schema#");
     }
