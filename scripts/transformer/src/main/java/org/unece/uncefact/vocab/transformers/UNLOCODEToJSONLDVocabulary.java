@@ -53,20 +53,20 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
                     data[i][j] = records.get(i).get(j);
             }
             for (int i=0; i<data.length; i++){
-                if (StringUtils.isEmpty(data[i][2])) {
+                if (StringUtils.isEmpty(data[i][2]) && !data[i][0].equalsIgnoreCase("=")) {
                     String country = data[i][3];
                     if (country.startsWith("."))
                         country = country.substring(1);
                     countryMapping.put(data[i][1], country);
                 }
-                else if (!data[i][1].equalsIgnoreCase("=")){
+                else if (!data[i][0].equalsIgnoreCase("=")){
                     String locode = data[i][1].concat(data[i][2]);
                     String description = data[i][3];
                     String descriptionWithoutSpecialSymbols = data[i][4];
                     String region = data[i][5];
                     JsonObjectBuilder rdfClass = Json.createObjectBuilder();
                     rdfClass.add(ID, StringUtils.join(UNLOCODE_NS, ":", locode));
-                    rdfClass.add(TYPE, StringUtils.join(UNLOCODE_NS, ":", "UNLOCODE"));
+                    rdfClass.add(TYPE, StringUtils.join(UNECE_NS, ":", "UNLOCODE"));
                     rdfClass.add(RDFS_COMMENT, description);
                     rdfClass.add(RDF_VALUE, locode);
                     if(StringUtils.isNotEmpty(region)) {
