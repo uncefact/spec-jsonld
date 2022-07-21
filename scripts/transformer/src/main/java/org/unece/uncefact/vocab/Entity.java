@@ -29,7 +29,7 @@ public class Entity {
     String representationTerm;
     String qualifiedDataTypeId;
     String associatedObjectClassTermQualifier;
-    String associatedObjectClassTerm;
+    String associatedObjectClass;
     String businessTerm;
     String context;
     String publicationComment;
@@ -149,12 +149,12 @@ public class Entity {
         ;
     }
 
-    public String getAssociatedObjectClassTerm() {
-        return associatedObjectClassTerm;
+    public String getAssociatedObjectClass() {
+        return associatedObjectClass;
     }
 
-    public void setAssociatedObjectClassTerm(String associatedObjectClassTerm) {
-        this.associatedObjectClassTerm = StringUtils.defaultIfEmpty(associatedObjectClassTerm.replaceAll(" ", ""), "");
+    public void setAssociatedObjectClass(String associatedObjectClass) {
+        this.associatedObjectClass = StringUtils.defaultIfEmpty(associatedObjectClass.replaceAll(" ", ""), "");
         ;
     }
 
@@ -187,7 +187,7 @@ public class Entity {
     }
 
     public String getAssociatedClassTermWithQualifier() {
-        return this.associatedObjectClassTermQualifier.concat(this.associatedObjectClassTerm);
+        return this.associatedObjectClassTermQualifier.concat(this.associatedObjectClass);
     }
 
     public String getPropertyTermWithQualifier() {
@@ -220,8 +220,8 @@ public class Entity {
         String propertyKey = getRepresentationTermForNDRRules();
         if (StringUtils.isBlank(getTDED()) || !codes.contains(getTDED())) {
             propertyKey = StringUtils.join(getPropertyTermWithQualifierForNDRRules(), propertyKey);
-            if (!StringUtils.isBlank(getAssociatedObjectClassTerm())) {
-                return StringUtils.join(propertyKey, getAssociatedObjectClassTerm());
+            if (!StringUtils.isBlank(getAssociatedObjectClass())) {
+                return StringUtils.join(propertyKey, getAssociatedObjectClass());
             }
         } else {
             // Checking for data type qualifiers (DTQs)
@@ -267,7 +267,7 @@ public class Entity {
         return result;
     }
 
-    public String getClassKey() {
+    public String getCefactBieDomainClass() {
         return (StringUtils.isNotBlank(getObjectClassTermQualifier()) ? getObjectClassTermQualifier().concat("_").concat(getObjectClassTerm()).concat(".Details") : getObjectClassTerm().concat(".Details")).replaceAll(" ", "");
     }
 
