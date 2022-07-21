@@ -8,6 +8,8 @@ import org.unece.uncefact.vocab.transformers.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -44,7 +46,7 @@ public class TransformationRunner {
             throw new MissingOptionException(inputFileOption.getOpt());
         }
 
-        String inputFileName = null;
+        Set<String> inputFileNames = new TreeSet<>();
         String outputFileName = "output.jsonld";
         boolean prettyPrint = false;
         String transformationType = "bsp";
@@ -54,7 +56,7 @@ public class TransformationRunner {
             Option option = optionIterator.next();
             String opt = StringUtils.defaultIfEmpty(option.getOpt(), "");
             if (opt.equals(inputFileOption.getOpt())) {
-                inputFileName = option.getValue();
+                inputFileNames.add(option.getValue());
             } else if (opt.equals(outputFileOption.getOpt())) {
                 outputFileName = option.getValue();
             } else if (opt.equals(prettyPrintOption.getOpt())) {
@@ -63,6 +65,7 @@ public class TransformationRunner {
                 transformationType = option.getValue();
             }
         }
+        String inputFileName = inputFileNames.iterator().next();
         switch (transformationType.toLowerCase()) {
             case "bsp":
                 transformer = new BSPToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
@@ -81,6 +84,10 @@ public class TransformationRunner {
                 break;
             case "uncl":
                 transformer = new UNCLToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+                break;
+            case "unlocode":
+                transformer = new UNLOCODEToJSONLDVocabulary(null, null, prettyPrint);
+                transformer.setInputFiles(inputFileNames);
                 break;
         }
         transformer.transform();

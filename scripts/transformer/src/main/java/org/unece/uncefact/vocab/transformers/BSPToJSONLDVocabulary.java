@@ -40,6 +40,11 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
     protected void setContext (){
         super.setContext();
 
+
+    }
+
+    protected void setContext (){
+        super.setContext();
         contextObjectBuilder.add(SCHEMA_NS, "http://schema.org/");
         contextObjectBuilder.add(CEFACT_NS, "https://edi3.org/cefact#");
         contextObjectBuilder.add(XSD_NS, "http://www.w3.org/2001/XMLSchema#");
