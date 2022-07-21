@@ -100,7 +100,7 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
         Map<String, Set<Entity>> classesMap = new TreeMap<>();
         Map<String, Set<Entity>> propertiesMap = new TreeMap<>();
         Set<String> classKeys = new TreeSet<>();
-        Set<String> repeatedClassKeys = new TreeSet<>();
+        Map<String, Integer> repeatedClassKeys = new TreeMap<>();
         for (Entity entity : vocabulary.values()) {
             if (entity.getType().equalsIgnoreCase(BBIE) || entity.getType().equalsIgnoreCase(ASBIE)) {
                 Set<Entity> entities = new HashSet<>();
@@ -115,11 +115,13 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
 
             if(entity.getType().equalsIgnoreCase(ABIE)){
                 String classKey = entity.getObjectClassTerm();
-                if (repeatedClassKeys.contains(classKey)){
-                    continue;
+                Integer count = 2;
+                if (repeatedClassKeys.containsKey(classKey)){
+                    count = repeatedClassKeys.get(classKey)+1;
+                    repeatedClassKeys.put(classKey, count);
                 }
                 else if(classKeys.contains(classKey)){
-                    repeatedClassKeys.add(classKey);
+                    repeatedClassKeys.put(classKey, count);
                 }
                 else {
                     classKeys.add(classKey);
@@ -130,13 +132,22 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
             if (entity.getType().equalsIgnoreCase(ABIE)) {
                 Set<Entity> entities = new HashSet<>();
                 String key = entity.getObjectClassTerm();
-                if(repeatedClassKeys.contains(key)){
+                if(repeatedClassKeys.containsKey(key)) {
                     key = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
                     // TODO: properly implement
-                    if(key.startsWith("Referenced_"))
-                        key = StringUtils.substringAfter(key, "Referenced_");
-                    else if(key.startsWith("Referenced"))
-                        key = StringUtils.substringAfter(key, "Referenced");
+                    if (key.startsWith("Referenced_")) {
+                        if (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
+                            key = entity.getObjectClassTerm();
+                        } else {
+                            key = StringUtils.substringAfter(key, "Referenced_");
+                        }
+                    } else if (key.startsWith("Referenced")) {
+                        if (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
+                            key = entity.getObjectClassTerm();
+                        } else {
+                            key = StringUtils.substringAfter(key, "Referenced");
+                        }
+                    }
                 }
                 if (classesMap.containsKey(key)) {
                     entities = classesMap.get(key);
@@ -221,17 +232,23 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
                 if (publicationComment.startsWith("Deprecated")) {
                     metadata.add(UNECE_STATUS, "deprecated");
                 }
-                String domainKey = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
-                if(repeatedClassKeys.contains(domainKey)){
-                    domain.add(domainKey);
-                } else {
-                    domain.add(entity.getObjectClassTerm());
-                }
                 // TODO: properly implement
-                if(domainKey.startsWith("Referenced_"))
-                    domainKey = StringUtils.substringAfter(domainKey, "Referenced_");
-                else if(domainKey.startsWith("Referenced"))
-                    domainKey = StringUtils.substringAfter(domainKey, "Referenced");
+                String domainKey = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
+                if (domainKey.startsWith("Referenced_")) {
+                    if (repeatedClassKeys.containsKey(domainKey) && (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2)) {
+                        domainKey = entity.getObjectClassTerm();
+                    } else {
+                        domainKey = StringUtils.substringAfter(domainKey, "Referenced_");
+                    }
+                } else if (domainKey.startsWith("Referenced")) {
+                    if (repeatedClassKeys.containsKey(domainKey) && (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2)) {
+                        domainKey = entity.getObjectClassTerm();
+                    } else {
+                        domainKey = StringUtils.substringAfter(domainKey, "Referenced");
+                    }
+                } else
+                    domainKey = entity.getObjectClassTerm();
+
                 domain.add(domainKey);
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
