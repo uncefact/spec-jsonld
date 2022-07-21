@@ -163,15 +163,13 @@ It has been agreed that the scope will NOT cover
 
 ## Maintenance
 
-UN/CEFACT release their reference data models twice a year (usually around July and December) the json-ld vocab would be produced as a follow on output from the release of Buy Ship Pay (BSP) reference data model.
+UN/CEFACT release their reference data models twice a year (usually around July and December) the intention for the JSON-LD project is that the json-ld vocab would be produced as a deliverable from the release of Buy Ship Pay (BSP) reference data model, this should be automated via scripts.
 
 1. BSP RDM Release 
 2. JSON Schema from BSP 
 3. JSON-LD release to UN/CEFACT GitHub
 
 This process means that the maintenance of semantics and data elements are managed within the UNECE following the official maintenance and release schedules, JSON-LD vocabulary is then produced from the release and tagged at the same version for stability.
-
-Issues relating specifically to the production of the JSON-LD would be managed in the UNECE Github via 'Issues' and maintained by the vocab team to provide input from users of the json-ld vocabulary.
 
 
 ## Requirements
