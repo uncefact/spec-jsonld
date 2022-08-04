@@ -89,7 +89,7 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
             entity.setRepresentationTerm(getStringCellValue(row, 12));
             entity.setQualifiedDataTypeId(getStringCellValue(row, 13));
             entity.setAssociatedObjectClassTermQualifier(getStringCellValue(row, 14));
-            entity.setAssociatedObjectClassTerm(getStringCellValue(row, 15));
+            entity.setAssociatedObjectClass(getStringCellValue(row, 15));
             entity.setBusinessTerm(getStringCellValue(row, 16));
             entity.setContext(getStringCellValue(row, 21, false));
             if (entity.getType() != null) {
@@ -99,17 +99,10 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
         }
         Map<String, Set<Entity>> classesMap = new TreeMap<>();
         Map<String, Set<Entity>> propertiesMap = new TreeMap<>();
+        Set<String> classKeys = new TreeSet<>();
+        Map<String, Integer> repeatedClassKeys = new TreeMap<>();
         for (Entity entity : vocabulary.values()) {
-            if (entity.getType() == null) {
-                entity.getName();
-            } else if (entity.getType().equalsIgnoreCase(ABIE)) {
-                Set<Entity> entities = new HashSet<>();
-                if (classesMap.containsKey(entity.getObjectClassTerm())) {
-                    entities = classesMap.get(entity.getObjectClassTerm());
-                }
-                entities.add(entity);
-                classesMap.put(entity.getObjectClassTerm(), entities);
-            } else if (entity.getType().equalsIgnoreCase(BBIE) || entity.getType().equalsIgnoreCase(ASBIE)) {
+            if (entity.getType().equalsIgnoreCase(BBIE) || entity.getType().equalsIgnoreCase(ASBIE)) {
                 Set<Entity> entities = new HashSet<>();
                 String key = entity.getPropertyKey();
                 key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key);
@@ -118,6 +111,49 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
                 }
                 entities.add(entity);
                 propertiesMap.put(key, entities);
+            }
+
+            if(entity.getType().equalsIgnoreCase(ABIE)){
+                String classKey = entity.getObjectClassTerm();
+                Integer count = 2;
+                if (repeatedClassKeys.containsKey(classKey)){
+                    count = repeatedClassKeys.get(classKey)+1;
+                    repeatedClassKeys.put(classKey, count);
+                }
+                else if(classKeys.contains(classKey)){
+                    repeatedClassKeys.put(classKey, count);
+                }
+                else {
+                    classKeys.add(classKey);
+                }
+            }
+        }
+        for (Entity entity : vocabulary.values()) {
+            if (entity.getType().equalsIgnoreCase(ABIE)) {
+                Set<Entity> entities = new HashSet<>();
+                String key = entity.getObjectClassTerm();
+                if(repeatedClassKeys.containsKey(key)) {
+                    key = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
+                    // TODO: properly implement
+                    if (key.startsWith("Referenced_")) {
+                        if (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
+                            key = entity.getObjectClassTerm();
+                        } else {
+                            key = StringUtils.substringAfter(key, "Referenced_");
+                        }
+                    } else if (key.startsWith("Referenced")) {
+                        if (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
+                            key = entity.getObjectClassTerm();
+                        } else {
+                            key = StringUtils.substringAfter(key, "Referenced");
+                        }
+                    }
+                }
+                if (classesMap.containsKey(key)) {
+                    entities = classesMap.get(key);
+                }
+                entities.add(entity);
+                classesMap.put(key, entities);
             }
         }
 
@@ -182,10 +218,10 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
                     }
                 } else if (entity.getType().equalsIgnoreCase(ASBIE)) {
                     metadata.add(TYPE, UNECE_ASBIE);
-                    rangeASBIE = entity.getAssociatedObjectClassTerm();
+                    rangeASBIE = entity.getAssociatedObjectClass();
                 }
                 metadata.add(UNECE_CEFACT_UN_ID, entity.getId());
-                metadata.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, StringUtils.join(CEFACT_NS,":",entity.getClassKey()));
+                metadata.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, StringUtils.join(CEFACT_NS,":",entity.getCefactBieDomainClass()));
                 metadata.add(UNECE_CEFACT_BUSINESS_PROCESS, entity.getContext());
                 String description = entity.getDescription();
                 String publicationComment = entity.getPublicationComment();
@@ -196,7 +232,24 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
                 if (publicationComment.startsWith("Deprecated")) {
                     metadata.add(UNECE_STATUS, "deprecated");
                 }
-                domain.add(entity.getObjectClassTerm());
+                // TODO: properly implement
+                String domainKey = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
+                if (domainKey.startsWith("Referenced_")) {
+                    if (repeatedClassKeys.containsKey(domainKey) && (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2)) {
+                        domainKey = entity.getObjectClassTerm();
+                    } else {
+                        domainKey = StringUtils.substringAfter(domainKey, "Referenced_");
+                    }
+                } else if (domainKey.startsWith("Referenced")) {
+                    if (repeatedClassKeys.containsKey(domainKey) && (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2)) {
+                        domainKey = entity.getObjectClassTerm();
+                    } else {
+                        domainKey = StringUtils.substringAfter(domainKey, "Referenced");
+                    }
+                } else
+                    domainKey = entity.getObjectClassTerm();
+
+                domain.add(domainKey);
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
                 if (StringUtils.isNotEmpty(entity.getTDED()) && entity.getTDED().length() > 1) {
