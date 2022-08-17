@@ -20,9 +20,6 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
     protected static String BBIE = "BBIE";
     protected static String ABIE = "ABIE";
     protected static String ASBIE = "ASBIE";
-    protected static String SCHEMA_NS = "schema";
-    protected static String SCHEMA_DOMAIN_INCLUDES = SCHEMA_NS+":domainIncludes";
-    protected static String SCHEMA_RANGE_INCLUDES = SCHEMA_NS+":rangeIncludes";
     protected static String UNECE_ABIE = UNECE_NS+":AggregateBIE";
     protected static String UNECE_BBIE = UNECE_NS+":BasicBIE";
     protected static String UNECE_ASBIE = UNECE_NS+":AssociationBIE";
@@ -35,12 +32,6 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
 
     public BSPToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile,prettyPrint);
-    }
-
-    protected void setContext (){
-        super.setContext();
-
-
     }
 
     protected void setContext (){

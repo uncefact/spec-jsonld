@@ -86,7 +86,7 @@ public class TransformationRunner {
                 transformer = new UNCLToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
                 break;
             case "unlocode":
-                transformer = new UNLOCODEToJSONLDVocabulary(null, null, prettyPrint);
+                transformer = new UNLOCODEToJSONLDVocabulary(prettyPrint);
                 transformer.setInputFiles(inputFileNames);
                 break;
         }
