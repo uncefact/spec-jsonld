@@ -47,7 +47,8 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             UNLOCODE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode/",
             UNLOCODE_COUNTRIES_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-countries/",
             UNLOCODE_SUBDIVISIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-subdivisions/",
-            UNLOCODE_FUNCTIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-functions/"
+            UNLOCODE_FUNCTIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-functions/",
+            RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     );
 
     protected static Map<String, Function> functionsMap = new HashMap<>();
@@ -95,7 +96,7 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
 
     protected void setContext() {
         super.setMinimalContext();
-        for (String ns :Arrays.asList(UNLOCODE_NS, UNLOCODE_COUNTRIES_NS, UNLOCODE_FUNCTIONS_NS)){
+        for (String ns :Arrays.asList(UNLOCODE_NS, UNLOCODE_COUNTRIES_NS, UNLOCODE_FUNCTIONS_NS, RDF_NS)){
             contextObjectBuilder.add(ns, NS_MAP.get(ns));
         }
     }
@@ -325,9 +326,11 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
 
             for (String key : countriesGraph.keySet()) {
                 graphJsonArrayBuilder = Json.createArrayBuilder();
-                setMinimalContext();
                 super.setMinimalContext();
                 contextObjectBuilder.add(UNLOCODE_COUNTRIES_NS, NS_MAP.get(UNLOCODE_COUNTRIES_NS));
+                if(!key.equalsIgnoreCase(COUNTRY_CLASS_NAME)){
+                    contextObjectBuilder.add(RDF_NS, NS_MAP.get(RDF_NS));
+                }
                 if (key.equalsIgnoreCase(PROPERTY_COUNTRY_CODE_NAME)) {
                     contextObjectBuilder.add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
                     contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
@@ -362,6 +365,9 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             for (String key : functionsGraph.keySet()) {
                 graphJsonArrayBuilder = Json.createArrayBuilder();
                 super.setMinimalContext();
+                if(!key.equalsIgnoreCase(FUNCTION_CLASS_NAME)){
+                    contextObjectBuilder.add(RDF_NS, NS_MAP.get(RDF_NS));
+                }
                 contextObjectBuilder.add(UNLOCODE_FUNCTIONS_NS, NS_MAP.get(UNLOCODE_FUNCTIONS_NS));
                 if (key.equalsIgnoreCase(FUNCTIONS_PROPERTY_NAME)) {
                     contextObjectBuilder.add(UNLOCODE_NS, NS_MAP.get(UNLOCODE_NS));
@@ -408,6 +414,9 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
                 graphJsonArrayBuilder = Json.createArrayBuilder();
                 super.setMinimalContext();
                 contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
+                if(!key.equalsIgnoreCase(SUBDIVISION_CLASS_NAME)){
+                    contextObjectBuilder.add(RDF_NS, NS_MAP.get(RDF_NS));
+                }
                 if (!key.equalsIgnoreCase(SUBDIVISION_CLASS_NAME)
                         & !key.equalsIgnoreCase(COUNTRY_SUBDIVISION_PROPERTY_NAME)
                         & !key.equalsIgnoreCase(SUBDIVISION_TYPE_PROPERTY_NAME)) {
