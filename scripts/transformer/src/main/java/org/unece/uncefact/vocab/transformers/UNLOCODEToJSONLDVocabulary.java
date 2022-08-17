@@ -17,11 +17,6 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class UNLOCODEToJSONLDVocabulary extends Transformer {
-    protected static String UNLOCODE_NS = "unlcd";
-    protected static String UNLOCODE_SUBDIVISIONS_NS = "unlcds";
-    protected static String UNLOCODE_COUNTRIES_NS = "unlcdc";
-    protected static String UNLOCODE_FUNCTIONS_NS = "unlcdf";
-    protected static String GEO_NS = "geo";
 
     protected static String FUNCTION_CLASS_NAME = "Function";
     protected static String FUNCTION_CLASS = StringUtils.join(UNLOCODE_FUNCTIONS_NS, ":", FUNCTION_CLASS_NAME);
@@ -40,16 +35,6 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
     protected static String PROPERTY_COUNTRY_CODE_NAME = "countryCode";
     protected static String PROPERTY_COUNTRY_CODE = StringUtils.join(UNLOCODE_COUNTRIES_NS, ":", PROPERTY_COUNTRY_CODE_NAME);
 
-    protected static Map<String, String> NS_MAP = Map.of(
-            GEO_NS, "http://www.w3.org/2003/01/geo/wgs84_pos#",
-            XSD_NS, "http://www.w3.org/2001/XMLSchema#",
-            SCHEMA_NS, "http://schema.org/",
-            UNLOCODE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode/",
-            UNLOCODE_COUNTRIES_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-countries/",
-            UNLOCODE_SUBDIVISIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-subdivisions/",
-            UNLOCODE_FUNCTIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-functions/",
-            RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-    );
 
     protected static Map<String, Function> functionsMap = new HashMap<>();
     Map<String, JsonObject> countriesGraph = new HashMap<>();
