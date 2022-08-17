@@ -29,7 +29,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
     protected static String UNECE_ABIE = UNECE_NS+":AggregateBIE";
     protected static String UNECE_BBIE = UNECE_NS+":BasicBIE";
     protected static String UNECE_ASBIE = UNECE_NS+":AssociationBIE";
-    protected static String UNECE_TDED = UNECE_NS+":TDED";
+    protected static String UNECE_TDED = UNECE_NS+":tded";
     protected static String UNECE_STATUS = UNECE_NS+":status";
     protected static String UNECE_CEFACT_UN_ID = UNECE_NS+":cefactUNId";
     protected static String UNECE_CEFACT_BUSINESS_PROCESS = UNECE_NS+":cefactBusinessProcess";
@@ -227,7 +227,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 if (entity.getType().equalsIgnoreCase(BBIE)) {
                     metadata.add(TYPE, UNECE_BBIE);
                     rangeBBIE = entity.getRepresentationTerm();
-                    if (StringUtils.isNotBlank(entity.getTDED())) {
+                    if (StringUtils.isNotBlank(entity.getTDED()) && !".".equals(entity.getTDED())) {
                         metadata.add(UNECE_TDED, entity.getTDED());
                     }
                 } else if (entity.getType().equalsIgnoreCase(ASBIE)) {
