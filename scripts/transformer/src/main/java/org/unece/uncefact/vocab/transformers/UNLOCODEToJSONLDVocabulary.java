@@ -143,7 +143,7 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
                     RDF_VALUE, id,
                     SUBDIVISION_TYPE_PROPERTY, code.getType()
             ));
-            JsonObjectBuilder countryObj = Json.createObjectBuilder(Map.of(ID, code.getCountry()));
+            JsonObjectBuilder countryObj = Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNLOCODE_COUNTRIES_NS, ":", code.getCountry())));
             rdfClass.add(PROPERTY_COUNTRY_CODE, countryObj);
 
             subdivisionsGraph.put(id, rdfClass.build());
@@ -236,7 +236,8 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
                     ));
                     rdfClass.add(COUNTRY_SUBDIVISION_PROPERTY, subdivisionObj);
                 }
-                rdfClass.add(StringUtils.join(PROPERTY_COUNTRY_CODE), country);
+                JsonObjectBuilder countryObj = Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNLOCODE_COUNTRIES_NS, ":", country)));
+                rdfClass.add(StringUtils.join(PROPERTY_COUNTRY_CODE), countryObj);
 
                 if (StringUtils.isNotEmpty(coordinates)) {
                     float latFloat;
