@@ -15,10 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class Transformer {
     protected static String ID = "@id";
     protected static String TYPE = "@type";
+    protected static String VALUE = "@value";
+    protected static String LANGUAGE = "@language";
     protected static String RDFS_NS = "rdfs";
     protected static String RDF_NS = "rdf";
     protected static String UNECE_NS = "unece";
@@ -29,7 +32,11 @@ public abstract class Transformer {
     protected static String RDF_VALUE = RDF_NS+":value";
     protected static String RDFS_COMMENT = RDFS_NS+":comment";
     protected static String RDFS_LABEL = RDFS_NS+":label";
+    protected static String SCHEMA_NS = "schema";
+    protected static String SCHEMA_DOMAIN_INCLUDES = SCHEMA_NS+":domainIncludes";
+    protected static String SCHEMA_RANGE_INCLUDES = SCHEMA_NS+":rangeIncludes";
     protected String inputFile;
+    protected Set<String> inputFiles;
     protected String outputFile;
 
     private boolean prettyPrint;
@@ -58,6 +65,12 @@ public abstract class Transformer {
         //common context for all vocabularies
         contextObjectBuilder.add(UNECE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unece#");
         contextObjectBuilder.add(RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        contextObjectBuilder.add(RDFS_NS, "http://www.w3.org/2000/01/rdf-schema#");
+    }
+
+    protected void setMinimalContext (){
+        contextObjectBuilder = Json.createObjectBuilder();
+        //common context for all vocabularies
         contextObjectBuilder.add(RDFS_NS, "http://www.w3.org/2000/01/rdf-schema#");
     }
 
@@ -115,5 +128,9 @@ public abstract class Transformer {
 
     protected String cleanUp(String attribute) {
         return attribute.replaceAll(" ", "").replaceAll("_", "").replaceAll("-", "").replaceAll("/", "")/*.replaceAll(".","")*/;
+    }
+
+    protected void setInputFiles(Set<String> inputFiles){
+        this.inputFiles = inputFiles;
     }
 }
