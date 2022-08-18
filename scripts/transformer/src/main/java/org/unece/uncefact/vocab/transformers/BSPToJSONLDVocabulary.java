@@ -5,17 +5,23 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.unece.uncefact.UNType;
 import org.unece.uncefact.vocab.Entity;
+import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.*;
 import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
-public class BSPToJSONLDVocabulary extends WorkBookTransformer {
+public class BSPToJSONLDVocabulary extends Transformer {
 
     protected static String BBIE = "BBIE";
     protected static String ABIE = "ABIE";
@@ -23,12 +29,15 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
     protected static String UNECE_ABIE = UNECE_NS+":AggregateBIE";
     protected static String UNECE_BBIE = UNECE_NS+":BasicBIE";
     protected static String UNECE_ASBIE = UNECE_NS+":AssociationBIE";
-    protected static String UNECE_TDED = UNECE_NS+":TDED";
+    protected static String UNECE_TDED = UNECE_NS+":tded";
     protected static String UNECE_STATUS = UNECE_NS+":status";
     protected static String UNECE_CEFACT_UN_ID = UNECE_NS+":cefactUNId";
     protected static String UNECE_CEFACT_BUSINESS_PROCESS = UNECE_NS+":cefactBusinessProcess";
     protected static String UNECE_CEFACT_ELEMENT_METADATA = UNECE_NS+":cefactElementMetadata";
     protected static String UNECE_CEFACT_BIE_DOMAIN_CLASS = UNECE_NS+":cefactBieDomainClass";
+
+    Map<String, JsonObject> propertiesGraph = new HashMap<>();
+    Map<String, JsonObject> classesGraph = new HashMap<>();
 
     public BSPToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile,prettyPrint);
@@ -36,12 +45,20 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
 
     protected void setContext (){
         super.setContext();
-        contextObjectBuilder.add(SCHEMA_NS, "http://schema.org/");
-        contextObjectBuilder.add(CEFACT_NS, "https://edi3.org/cefact#");
-        contextObjectBuilder.add(XSD_NS, "http://www.w3.org/2001/XMLSchema#");
-        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-        objectBuilder.add(TYPE, ID);
-        contextObjectBuilder.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, objectBuilder.build());
+        for (String ns : Arrays.asList(CEFACT_NS)){
+            contextObjectBuilder.add(ns, NS_MAP.get(ns));
+        }
+    }
+
+    public void transform() throws IOException, InvalidFormatException {
+        try {
+            Files.createDirectory(Paths.get(UNECE_NS));
+        } catch (FileAlreadyExistsException e) {
+            System.err.println(String.format("Output directory %s already exists, please remove it and repeat.", UNLOCODE_NS));
+            throw e;
+        }
+        Workbook workbook = WorkbookFactory.create(new File(inputFile));
+        readInputFileToGraphArray(workbook);
     }
 
     public void readInputFileToGraphArray(final Object object) {
@@ -187,14 +204,13 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
             }
             rdfClass.add(RDFS_LABEL, id);
             rdfClass.add(UNECE_CEFACT_ELEMENT_METADATA, metadataJsonArrayBuilder.build());
-            graphJsonArrayBuilder.add(rdfClass);
+            classesGraph.put(id, rdfClass.build());
         }
 
         for (String key : propertiesMap.keySet()) {
             String id = key;
             JsonObjectBuilder rdfProperty = Json.createObjectBuilder();
             rdfProperty.add(ID, StringUtils.join(UNECE_NS,":",id));
-            rdfProperty.add(TYPE, RDF_PROPERTY);
 
             JsonArrayBuilder metadataJsonArrayBuilder = Json.createArrayBuilder();
             Set<Entity> entities = propertiesMap.get(key);
@@ -203,13 +219,15 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
             TreeSet<String> domain = new TreeSet<>();
             TreeSet<String> comment = new TreeSet<>();
             TreeSet<String> tded = new TreeSet<>();
+            JsonArrayBuilder typeArray = Json.createArrayBuilder();
+            typeArray.add(RDF_PROPERTY);
             for (Entity entity : entities) {
                 JsonObjectBuilder metadata = Json.createObjectBuilder();
                 metadata.add(ID, StringUtils.join(CEFACT_NS,":",entity.getName()));
                 if (entity.getType().equalsIgnoreCase(BBIE)) {
                     metadata.add(TYPE, UNECE_BBIE);
                     rangeBBIE = entity.getRepresentationTerm();
-                    if (StringUtils.isNotBlank(entity.getTDED())) {
+                    if (StringUtils.isNotBlank(entity.getTDED()) && !".".equals(entity.getTDED())) {
                         metadata.add(UNECE_TDED, entity.getTDED());
                     }
                 } else if (entity.getType().equalsIgnoreCase(ASBIE)) {
@@ -253,6 +271,7 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
                 }
             }
             if (rangeBBIE != null) {
+                typeArray.add(StringUtils.join(OWL_NS,":","DatatypeProperty"));
                 if (StringUtils.isBlank(rangeBBIE)) {
                     System.err.println(String.format("rangeBBIE is blank for %s", key));
                 }
@@ -266,8 +285,10 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
                     rdfProperty.add(SCHEMA_RANGE_INCLUDES, (JsonArrayBuilder) rangeIncludes);
                 }
             } else {
+                typeArray.add(StringUtils.join(OWL_NS,":","ObjectProperty"));
                 rdfProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder().add(ID, StringUtils.join(UNECE_NS,":",rangeASBIE)));
             }
+            rdfProperty.add(TYPE, typeArray);
             if (domain.size() == 1) {
                 rdfProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder().add(ID, StringUtils.join(UNECE_NS,":",domain.iterator().next())));
             } else {
@@ -289,7 +310,36 @@ public class BSPToJSONLDVocabulary extends WorkBookTransformer {
             }
             rdfProperty.add(RDFS_LABEL, id);
             rdfProperty.add(UNECE_CEFACT_ELEMENT_METADATA, metadataJsonArrayBuilder.build());
-            graphJsonArrayBuilder.add(rdfProperty);
+            propertiesGraph.put(id, rdfProperty.build());
+        }
+
+        try {
+            for (String key : propertiesGraph.keySet()) {
+                graphJsonArrayBuilder = Json.createArrayBuilder();
+                JsonObject jsonObject = propertiesGraph.get(key);
+                setContext();
+                if (jsonObject.get(SCHEMA_RANGE_INCLUDES).asJsonObject().getString(ID).startsWith(XSD_NS)){
+                    contextObjectBuilder.add(XSD_NS, NS_MAP.get(XSD_NS));
+                }
+                contextObjectBuilder.add(OWL_NS, NS_MAP.get(OWL_NS));
+                contextObjectBuilder.add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
+                contextObjectBuilder.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, objectBuilder.build());
+                outputFile = StringUtils.join(UNECE_NS, "/",key,".jsonld");
+                graphJsonArrayBuilder.add(jsonObject);
+                super.transform();
+            }
+            for (String key : classesGraph.keySet()) {
+                graphJsonArrayBuilder = Json.createArrayBuilder();
+                setContext();
+                outputFile = StringUtils.join(UNECE_NS, "/",key,".jsonld");
+                graphJsonArrayBuilder.add(classesGraph.get(key));
+                super.transform();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidFormatException e) {
+            throw new RuntimeException(e);
         }
     }
 
