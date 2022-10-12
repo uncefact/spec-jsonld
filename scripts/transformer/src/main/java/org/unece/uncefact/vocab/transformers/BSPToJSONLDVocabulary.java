@@ -36,8 +36,8 @@ public class BSPToJSONLDVocabulary extends Transformer {
     protected static String UNECE_CEFACT_ELEMENT_METADATA = UNECE_NS+":cefactElementMetadata";
     protected static String UNECE_CEFACT_BIE_DOMAIN_CLASS = UNECE_NS+":cefactBieDomainClass";
 
-    Map<String, JsonObject> propertiesGraph = new HashMap<>();
-    Map<String, JsonObject> classesGraph = new HashMap<>();
+    Map<String, JsonObject> propertiesGraph = new TreeMap<>();
+    Map<String, JsonObject> classesGraph = new TreeMap<>();
 
     public BSPToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile,prettyPrint);
@@ -94,7 +94,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
             entity.setName(getStringCellValue(row, 3, false));
             entity.setDescription(getStringCellValue(row, 4, false));
             entity.setPublicationComment(getStringCellValue(row, 6, false));
-            entity.setObjectClassTermQualifier(getStringCellValue(row, 7, false));
+            entity.setObjectClassTermQualifier(getStringCellValue(row, 7, true));
             entity.setObjectClassTerm(getStringCellValue(row, 8));
             entity.setPropertyTermQualifier(getStringCellValue(row, 9));
             entity.setPropertyTerm(getStringCellValue(row, 10));
@@ -129,15 +129,15 @@ public class BSPToJSONLDVocabulary extends Transformer {
             if(entity.getType().equalsIgnoreCase(ABIE)){
                 String classKey = entity.getObjectClassTerm();
                 Integer count = 2;
-                if (repeatedClassKeys.containsKey(classKey)){
-                    count = repeatedClassKeys.get(classKey)+1;
-                    repeatedClassKeys.put(classKey, count);
-                }
-                else if(classKeys.contains(classKey)){
-                    repeatedClassKeys.put(classKey, count);
-                }
-                else {
-                    classKeys.add(classKey);
+                if(!entity.getObjectClassTermQualifier().startsWith("Referenced")) {
+                    if (repeatedClassKeys.containsKey(classKey)) {
+                        count = repeatedClassKeys.get(classKey) + 1;
+                        repeatedClassKeys.put(classKey, count);
+                    } else if (classKeys.contains(classKey)) {
+                        repeatedClassKeys.put(classKey, count);
+                    } else {
+                        classKeys.add(classKey);
+                    }
                 }
             }
         }
@@ -146,19 +146,16 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 Set<Entity> entities = new HashSet<>();
                 String key = entity.getObjectClassTerm();
                 if(repeatedClassKeys.containsKey(key)) {
-                    key = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
-                    // TODO: properly implement
-                    if (key.startsWith("Referenced_")) {
-                        if (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
-                            key = entity.getObjectClassTerm();
-                        } else {
-                            key = StringUtils.substringAfter(key, "Referenced_");
-                        }
-                    } else if (key.startsWith("Referenced")) {
-                        if (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
-                            key = entity.getObjectClassTerm();
-                        } else {
+                    if(repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
+                        key = entity.getObjectClassTerm();
+                    } else {
+                        key = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
+                        if (key.startsWith("Referenced")) {
+
                             key = StringUtils.substringAfter(key, "Referenced");
+                        }
+                        if (key.startsWith("_")) {
+                            key = StringUtils.substringAfter(key, "_");
                         }
                     }
                 }
@@ -171,6 +168,10 @@ public class BSPToJSONLDVocabulary extends Transformer {
         }
 
         for (String key : classesMap.keySet()) {
+
+            if (propertiesMap.containsKey(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key))){
+                System.out.println(String.format("Name \"%s\"is used for both a property and a class", key));
+            }
             JsonArrayBuilder metadataJsonArrayBuilder = Json.createArrayBuilder();
             String id = key;
             Set<Entity> entities = classesMap.get(key);
@@ -233,6 +234,19 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 } else if (entity.getType().equalsIgnoreCase(ASBIE)) {
                     metadata.add(TYPE, UNECE_ASBIE);
                     rangeASBIE = entity.getAssociatedObjectClass();
+                    if (repeatedClassKeys.containsKey(entity.getAssociatedObjectClass())) {
+                        if(repeatedClassKeys.get(entity.getAssociatedObjectClass()) == 2) {
+                            rangeASBIE = entity.getAssociatedObjectClass();
+                        } else {
+                            rangeASBIE = entity.getAssociatedClassTermWithQualifier();
+                            if (rangeASBIE.startsWith("Referenced")) {
+                                rangeASBIE = StringUtils.substringAfter(rangeASBIE, "Referenced");
+                            }
+                            if (rangeASBIE.startsWith("_")) {
+                                rangeASBIE = StringUtils.substringAfter(rangeASBIE, "_");
+                            }
+                        }
+                    }
                 }
                 metadata.add(UNECE_CEFACT_UN_ID, entity.getId());
                 metadata.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, StringUtils.join(CEFACT_NS,":",entity.getCefactBieDomainClass()));
@@ -247,22 +261,20 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     metadata.add(UNECE_STATUS, "deprecated");
                 }
                 // TODO: properly implement
-                String domainKey = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
-                if (domainKey.startsWith("Referenced_")) {
-                    if (repeatedClassKeys.containsKey(domainKey) && (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2)) {
+                String domainKey = entity.getObjectClassTerm();
+                if (repeatedClassKeys.containsKey(domainKey)) {
+                    if(repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
                         domainKey = entity.getObjectClassTerm();
                     } else {
-                        domainKey = StringUtils.substringAfter(domainKey, "Referenced_");
+                        domainKey = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
+                        if (domainKey.startsWith("Referenced")) {
+                            domainKey = StringUtils.substringAfter(domainKey, "Referenced");
+                        }
+                        if (domainKey.startsWith("_")) {
+                            domainKey = StringUtils.substringAfter(domainKey, "_");
+                        }
                     }
-                } else if (domainKey.startsWith("Referenced")) {
-                    if (repeatedClassKeys.containsKey(domainKey) && (repeatedClassKeys.get(entity.getObjectClassTerm()) == 2)) {
-                        domainKey = entity.getObjectClassTerm();
-                    } else {
-                        domainKey = StringUtils.substringAfter(domainKey, "Referenced");
-                    }
-                } else
-                    domainKey = entity.getObjectClassTerm();
-
+                }
                 domain.add(domainKey);
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
@@ -359,12 +371,12 @@ public class BSPToJSONLDVocabulary extends Transformer {
 
         if (filteredTDED.size() != 0) {
             if (filteredTDED.size() == 1) {
-                String item = String.format("unece:UNECECL%sCode", filteredTDED.iterator().next());
+                String item = StringUtils.join(UNECE_NS, ":", String.format("UNCL%sCode", filteredTDED.iterator().next()));
                 return result.add(ID, item);
             } else {
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 for (String item : filteredTDED) {
-                    arrayBuilder.add(Json.createObjectBuilder().add(ID, String.format("unece:UNECECL%sCode", item)));
+                    arrayBuilder.add(Json.createObjectBuilder().add(ID, StringUtils.join(UNECE_NS, ":", String.format("UNCL%sCode", item))));
                 }
                 return arrayBuilder;
             }

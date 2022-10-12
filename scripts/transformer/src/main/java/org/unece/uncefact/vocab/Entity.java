@@ -221,7 +221,7 @@ public class Entity {
         if (StringUtils.isBlank(getTDED()) || !codes.contains(getTDED())) {
             propertyKey = StringUtils.join(getPropertyTermWithQualifierForNDRRules(), propertyKey);
             if (!StringUtils.isBlank(getAssociatedObjectClass())) {
-                return StringUtils.join(propertyKey, getAssociatedObjectClass());
+                propertyKey = StringUtils.join(propertyKey, getAssociatedObjectClass());
             }
         } else {
             // Checking for data type qualifiers (DTQs)
