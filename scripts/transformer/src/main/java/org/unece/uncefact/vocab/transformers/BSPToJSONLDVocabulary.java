@@ -276,6 +276,8 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     }
                 }
                 domain.add(domainKey);
+                metadata.add("unece:domainName", domainKey);
+
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
                 if (StringUtils.isNotEmpty(entity.getTDED()) && entity.getTDED().length() > 1) {
