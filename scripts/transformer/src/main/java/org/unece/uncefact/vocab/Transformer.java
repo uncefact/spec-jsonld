@@ -19,29 +19,29 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class Transformer {
-    protected static String ID = "@id";
-    protected static String TYPE = "@type";
-    protected static String VALUE = "@value";
-    protected static String LANGUAGE = "@language";
-    protected static String OWL_NS = "owl";
-    protected static String RDFS_NS = "rdfs";
-    protected static String RDF_NS = "rdf";
-    protected static String UNECE_NS = "unece";
-    protected static String CEFACT_NS = "cefact";
-    protected static String XSD_NS = "xsd";
-    protected static String RDFS_CLASS = RDFS_NS+":Class";
-    protected static String RDF_PROPERTY = RDF_NS+":Property";
-    protected static String RDF_VALUE = RDF_NS+":value";
-    protected static String RDFS_COMMENT = RDFS_NS+":comment";
-    protected static String RDFS_LABEL = RDFS_NS+":label";
-    protected static String SCHEMA_NS = "schema";
-    protected static String SCHEMA_DOMAIN_INCLUDES = SCHEMA_NS+":domainIncludes";
-    protected static String SCHEMA_RANGE_INCLUDES = SCHEMA_NS+":rangeIncludes";
+    public static String ID = "@id";
+    public static String TYPE = "@type";
+    public static String VALUE = "@value";
+    public static String LANGUAGE = "@language";
+    public static String OWL_NS = "owl";
+    public static String RDFS_NS = "rdfs";
+    public static String RDF_NS = "rdf";
+    public static String UNECE_NS = "unece";
+    public static String CEFACT_NS = "cefact";
+    public static String XSD_NS = "xsd";
+    public static String RDFS_CLASS = RDFS_NS+":Class";
+    public static String RDF_PROPERTY = RDF_NS+":Property";
+    public static String RDF_VALUE = RDF_NS+":value";
+    public static String RDFS_COMMENT = RDFS_NS+":comment";
+    public static String RDFS_LABEL = RDFS_NS+":label";
+    public static String SCHEMA_NS = "schema";
+    public static String SCHEMA_DOMAIN_INCLUDES = SCHEMA_NS+":domainIncludes";
+    public static String SCHEMA_RANGE_INCLUDES = SCHEMA_NS+":rangeIncludes";
     protected String inputFile;
     protected Set<String> inputFiles;
     protected String outputFile;
 
-    private boolean prettyPrint;
+    protected boolean prettyPrint;
 
     protected JsonObject context;
 
@@ -53,8 +53,17 @@ public abstract class Transformer {
     protected static String UNLOCODE_NS = "unlcd";
     protected static String UNLOCODE_SUBDIVISIONS_NS = "unlcds";
     protected static String UNLOCODE_COUNTRIES_NS = "unlcdc";
-    protected static String UNLOCODE_FUNCTIONS_NS = "unlcdf";
-    protected static String GEO_NS = "geo";
+    protected static String UNLOCODE_VOCAB_NS = "unlcdv";
+    protected static String UNLOCODE_FUNC_NS = "unlcdf";
+    public static String GEO_NS = "geo";
+    protected static String REC20_NS = "rec20";
+    protected static String REC21_NS = "rec21";
+    protected static String REC24_NS = "rec24";
+    protected static String REC28_NS = "rec28";
+
+    /*protected static String DOMAIN = "service.unece.org";*/
+    protected static String DOMAIN = "dmvc7xzscpizo.cloudfront.net";
+
 
     protected static Map<String, String> NS_MAP = new HashMap<>();
 
@@ -62,15 +71,20 @@ public abstract class Transformer {
         NS_MAP.put(GEO_NS, "http://www.w3.org/2003/01/geo/wgs84_pos#");
         NS_MAP.put(XSD_NS, "http://www.w3.org/2001/XMLSchema#");
         NS_MAP.put(SCHEMA_NS, "http://schema.org/");
-        NS_MAP.put(UNLOCODE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode/");
-        NS_MAP.put(UNLOCODE_COUNTRIES_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-countries/");
-        NS_MAP.put(UNLOCODE_SUBDIVISIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-subdivisions/");
-        NS_MAP.put(UNLOCODE_FUNCTIONS_NS, "https://service.unece.org/trade/uncefact/vocabulary/unlocode-functions/");
-        NS_MAP.put(UNECE_NS, "https://service.unece.org/trade/uncefact/vocabulary/unece#");
+        NS_MAP.put(UNLOCODE_NS, String.format("https://%s/unlocode#", DOMAIN));
+        NS_MAP.put(UNLOCODE_COUNTRIES_NS, String.format("https://%s/unlocode-countries#", DOMAIN));
+        NS_MAP.put(UNLOCODE_SUBDIVISIONS_NS, String.format("https://%s/unlocode-subdivisions#", DOMAIN));
+        NS_MAP.put(UNLOCODE_FUNC_NS, String.format("https://%s/unlocode-functions#", DOMAIN));
+        NS_MAP.put(UNLOCODE_VOCAB_NS, String.format("https://%s/unlocode-vocab#", DOMAIN));
+        NS_MAP.put(UNECE_NS, String.format("https://%s/", DOMAIN));
+        NS_MAP.put(REC20_NS, String.format("https://%s/rec20#", DOMAIN));
+        NS_MAP.put(REC21_NS, String.format("https://%s/rec21#", DOMAIN));
+        NS_MAP.put(REC24_NS, String.format("https://%s/rec24#", DOMAIN));
+        NS_MAP.put(REC28_NS, String.format("https://%s/rec28#", DOMAIN));
         NS_MAP.put(RDF_NS, "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         NS_MAP.put(RDFS_NS, "http://www.w3.org/2000/01/rdf-schema#");
         NS_MAP.put(OWL_NS, "http://www.w3.org/2002/07/owl#");
-        NS_MAP.put(CEFACT_NS, "https://service.unece.org/trade/uncefact/vocabulary/cefact#");
+        NS_MAP.put(CEFACT_NS, String.format("https://%s/cefact#", DOMAIN));
     }
 
 
