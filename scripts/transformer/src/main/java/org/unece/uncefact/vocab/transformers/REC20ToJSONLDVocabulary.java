@@ -9,12 +9,10 @@ import javax.json.*;
 import java.util.*;
 
 public class REC20ToJSONLDVocabulary extends WorkBookTransformer {
-    protected static String REC20_NS = "rec20";
 
     public REC20ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile, prettyPrint);
-
-        contextObjectBuilder.add(REC20_NS, "https://service.unece.org/trade/uncefact/vocabulary/uncefact/rec20#");
+        contextObjectBuilder.add(REC20_NS, NS_MAP.get(REC20_NS));
     }
 
     public void readInputFileToGraphArray(final Object object) {
@@ -45,13 +43,19 @@ public class REC20ToJSONLDVocabulary extends WorkBookTransformer {
             JsonObjectBuilder rdfClass = Json.createObjectBuilder();
             rdfClass.add(ID, StringUtils.join(REC20_NS,":",code));
             rdfClass.add(TYPE, StringUtils.join(UNECE_NS,":","UNECERec20Code"));
-            rdfClass.add(RDFS_COMMENT, description);
-            rdfClass.add(RDFS_LABEL, name);
+            if (StringUtils.isNotEmpty(description))
+                rdfClass.add(RDFS_COMMENT, description);
+            if (StringUtils.isNotEmpty(name))
+                rdfClass.add(RDFS_LABEL, name);
             rdfClass.add(RDF_VALUE, code);
-            rdfClass.add(StringUtils.join(UNECE_NS,":","levelCategory"), levelCategory);
-            rdfClass.add(StringUtils.join(UNECE_NS,":","symbol"), symbol);
-            rdfClass.add(StringUtils.join(UNECE_NS,":","conversionFactor"), conversionFactor);
-            rdfClass.add(StringUtils.join(UNECE_NS,":","status"), status);
+            if (StringUtils.isNotEmpty(levelCategory))
+                rdfClass.add(StringUtils.join(UNECE_NS,":","levelCategory"), levelCategory);
+            if (StringUtils.isNotEmpty(symbol))
+                rdfClass.add(StringUtils.join(UNECE_NS,":","symbol"), symbol);
+            if (StringUtils.isNotEmpty(conversionFactor))
+                rdfClass.add(StringUtils.join(UNECE_NS,":","conversionFactor"), conversionFactor);
+            if (StringUtils.isNotEmpty(status))
+                rdfClass.add(StringUtils.join(UNECE_NS,":","status"), status);
             graphJsonArrayBuilder.add(rdfClass);
         }
     }

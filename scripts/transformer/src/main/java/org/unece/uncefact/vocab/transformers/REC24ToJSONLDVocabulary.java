@@ -12,12 +12,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class REC24ToJSONLDVocabulary extends WorkBookTransformer {
-    protected static String REC24_NS = "rec24";
 
     public REC24ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile, prettyPrint);
 
-        contextObjectBuilder.add(REC24_NS, "https://service.unece.org/trade/uncefact/vocabulary/uncefact/rec24#");
+        contextObjectBuilder.add(REC24_NS, NS_MAP.get(REC24_NS));
     }
 
     public void readInputFileToGraphArray(final Object object) {
