@@ -12,12 +12,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class REC21ToJSONLDVocabulary extends WorkBookTransformer {
-    protected static String REC21_NS = "rec21";
 
     public REC21ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
         super(inputFile, outputFile, prettyPrint);
 
-        contextObjectBuilder.add(REC21_NS, "https://service.unece.org/trade/uncefact/vocabulary/uncefact/rec21#");
+        contextObjectBuilder.add(REC21_NS, NS_MAP.get(REC21_NS));
     }
 
     public void readInputFileToGraphArray(final Object object) {
@@ -36,6 +35,8 @@ public class REC21ToJSONLDVocabulary extends WorkBookTransformer {
             // Status,Code,Name,Description,Numeric code
             String status = getCellValue(row, 0);
             String code = getCellValue(row, 1);
+            if (StringUtils.isEmpty(code))
+                continue;
             String name = getCellValue(row, 2);
             if (codes.contains(code)) {
                 System.err.println("Duplicated name - ".concat(name));
@@ -46,10 +47,14 @@ public class REC21ToJSONLDVocabulary extends WorkBookTransformer {
             JsonObjectBuilder rdfClass = Json.createObjectBuilder();
             rdfClass.add(ID, StringUtils.join(REC21_NS,":",code));
             rdfClass.add(TYPE, StringUtils.join(UNECE_NS,":","UNECERec21Code"));
-            rdfClass.add(RDFS_COMMENT, description);
+            if (StringUtils.isNotEmpty(description))
+                rdfClass.add(RDFS_COMMENT, description);
             rdfClass.add(RDFS_LABEL, name);
             rdfClass.add(RDF_VALUE, code);
             rdfClass.add(StringUtils.join(UNECE_NS,":","numericCode"), numericCode);
+            /* there are only two codes with the status defined, guess we can ignore it
+            if (StringUtils.isNotEmpty(status))
+                rdfClass.add(StringUtils.join(UNECE_NS,":","status"), status);*/
             graphJsonArrayBuilder.add(rdfClass);
         }
     }
