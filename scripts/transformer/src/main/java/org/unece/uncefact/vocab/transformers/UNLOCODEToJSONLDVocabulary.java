@@ -19,28 +19,29 @@ import java.util.*;
 public class UNLOCODEToJSONLDVocabulary extends Transformer {
 
     protected static String FUNCTION_CLASS_NAME = "Function";
-    protected static String FUNCTION_CLASS = StringUtils.join(UNLOCODE_FUNCTIONS_NS, ":", FUNCTION_CLASS_NAME);
-    protected static String FUNCTIONS_PROPERTY_NAME = "functions";
-    protected static String FUNCTIONS_PROPERTY = StringUtils.join(UNLOCODE_FUNCTIONS_NS, ":", FUNCTIONS_PROPERTY_NAME);
-    protected static String SUBDIVISION_CLASS_NAME = "Subdivision";
-    protected static String SUBDIVISION_CLASS = StringUtils.join(UNLOCODE_SUBDIVISIONS_NS, ":", SUBDIVISION_CLASS_NAME);
-    protected static String COUNTRY_SUBDIVISION_PROPERTY_NAME = "countrySubdivision";
-    protected static String COUNTRY_SUBDIVISION_PROPERTY = StringUtils.join(UNLOCODE_SUBDIVISIONS_NS, ":", COUNTRY_SUBDIVISION_PROPERTY_NAME);
-    protected static String SUBDIVISION_TYPE_PROPERTY_NAME = "subdivisionType";
-    protected static String SUBDIVISION_TYPE_PROPERTY = StringUtils.join(UNLOCODE_SUBDIVISIONS_NS, ":", SUBDIVISION_TYPE_PROPERTY_NAME);
-    protected static String COUNTRY_CLASS_NAME = "Country";
-    protected static String COUNTRY_CLASS = StringUtils.join(UNLOCODE_COUNTRIES_NS, ":", COUNTRY_CLASS_NAME);
-    protected static String UNLOCODE_CLASS_NAME = "UNLOCODE";
-    protected static String UNLOCODE_CLASS = StringUtils.join(UNLOCODE_NS, ":", UNLOCODE_CLASS_NAME);
-    protected static String PROPERTY_COUNTRY_CODE_NAME = "countryCode";
-    protected static String PROPERTY_COUNTRY_CODE = StringUtils.join(UNLOCODE_COUNTRIES_NS, ":", PROPERTY_COUNTRY_CODE_NAME);
+    protected static String FUNCTION_CLASS = StringUtils.join(UNLOCODE_VOCAB_NS, ":", FUNCTION_CLASS_NAME);
+    public static String FUNCTIONS_PROPERTY_NAME = "functions";
+    public static String FUNCTIONS_PROPERTY = StringUtils.join(UNLOCODE_VOCAB_NS, ":", FUNCTIONS_PROPERTY_NAME);
+    public static String SUBDIVISION_CLASS_NAME = "Subdivision";
+    public static String SUBDIVISION_CLASS = StringUtils.join(UNLOCODE_VOCAB_NS, ":", SUBDIVISION_CLASS_NAME);
+    public static String COUNTRY_SUBDIVISION_PROPERTY_NAME = "countrySubdivision";
+    public static String COUNTRY_SUBDIVISION_PROPERTY = StringUtils.join(UNLOCODE_VOCAB_NS, ":", COUNTRY_SUBDIVISION_PROPERTY_NAME);
+    public static String SUBDIVISION_TYPE_PROPERTY_NAME = "subdivisionType";
+    public static String SUBDIVISION_TYPE_PROPERTY = StringUtils.join(UNLOCODE_VOCAB_NS, ":", SUBDIVISION_TYPE_PROPERTY_NAME);
+    public static String COUNTRY_CLASS_NAME = "Country";
+    public static String COUNTRY_CLASS = StringUtils.join(UNLOCODE_VOCAB_NS, ":", COUNTRY_CLASS_NAME);
+    public static String UNLOCODE_CLASS_NAME = "UNLOCODE";
+    public static String UNLOCODE_CLASS = StringUtils.join(UNLOCODE_VOCAB_NS, ":", UNLOCODE_CLASS_NAME);
+    public static String PROPERTY_COUNTRY_CODE_NAME = "countryCode";
+    public static String PROPERTY_COUNTRY_CODE = StringUtils.join(UNLOCODE_VOCAB_NS, ":", PROPERTY_COUNTRY_CODE_NAME);
 
 
-    protected static Map<String, Function> functionsMap = new HashMap<>();
-    Map<String, JsonObject> countriesGraph = new HashMap<>();
-    Map<String, JsonObject> subdivisionsGraph = new HashMap<>();
-    Map<String, JsonObject> functionsGraph = new HashMap<>();
-    Map<String, JsonObject> locodesGraph = new HashMap<>();
+    protected static Map<String, Function> functionsMap = new TreeMap<>();
+    Map<String, JsonObject> countriesGraph = new TreeMap<>();
+    Map<String, JsonObject> subdivisionsGraph = new TreeMap<>();
+    Map<String, JsonObject> vocabGraph = new TreeMap<>();
+    Map<String, JsonObject> functionsGraph = new TreeMap<>();
+    Map<String, JsonObject> locodesGraph = new TreeMap<>();
 
     /**
      * Static block to initialise functions graph
@@ -63,7 +64,7 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             Function function = functionsMap.get(key);
             String id = function.getCode();
             JsonObjectBuilder rdfClass = Json.createObjectBuilder(Map.of(
-                    ID, StringUtils.join(UNLOCODE_FUNCTIONS_NS, ":", id),
+                    ID, StringUtils.join(UNLOCODE_FUNC_NS, ":", id),
                     TYPE, FUNCTION_CLASS,
                     RDFS_LABEL, function.getFunction(),
                     RDFS_COMMENT, function.getDefinition(),
@@ -81,7 +82,7 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
 
     protected void setContext() {
         super.setMinimalContext();
-        for (String ns :Arrays.asList(UNLOCODE_NS, UNLOCODE_COUNTRIES_NS, UNLOCODE_FUNCTIONS_NS, RDF_NS)){
+        for (String ns :Arrays.asList(UNLOCODE_VOCAB_NS, RDF_NS)){
             contextObjectBuilder.add(ns, NS_MAP.get(ns));
         }
     }
@@ -92,10 +93,9 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             Files.createDirectory(Paths.get(UNLOCODE_NS));
             Files.createDirectory(Paths.get(UNLOCODE_NS.concat("/unlocode")));
             Files.createDirectory(Paths.get(UNLOCODE_NS.concat("/unlocode-countries")));
-            Files.createDirectory(Paths.get(UNLOCODE_NS.concat("/unlocode-functions")));
             Files.createDirectory(Paths.get(UNLOCODE_NS.concat("/unlocode-subdivisions")));
         } catch (FileAlreadyExistsException e) {
-            System.err.println(String.format("Output directory %s already exists, please remove it and repeat.", UNLOCODE_NS));
+            System.err.printf("Output directory %s already exists, please remove it and repeat.%n", UNLOCODE_NS);
             throw e;
         }
         List<CSVRecord> locodes = new ArrayList();
@@ -204,14 +204,14 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
                     JsonArrayBuilder functionArray = Json.createArrayBuilder();
                     for (String functionItem : functions) {
                         JsonObjectBuilder functionObj = Json.createObjectBuilder(Map.of(
-                                ID, StringUtils.join(UNLOCODE_FUNCTIONS_NS, ":", functionItem)
+                                ID, StringUtils.join(UNLOCODE_FUNC_NS, ":", functionItem)
                         ));
                         functionArray.add(functionObj);
                     }
                     rdfClass.add(FUNCTIONS_PROPERTY, functionArray);
                 } else {
                     JsonObjectBuilder functionObj = Json.createObjectBuilder(Map.of(
-                            ID, StringUtils.join(UNLOCODE_FUNCTIONS_NS, ":", functions.get(0))
+                            ID, StringUtils.join(UNLOCODE_FUNC_NS, ":", functions.get(0))
                     ));
                     rdfClass.add(FUNCTIONS_PROPERTY, functionObj);
                 }
@@ -254,41 +254,12 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             }
         }
         try {
-            JsonObjectBuilder unlocodeClass = Json.createObjectBuilder(Map.of(
-                    ID, UNLOCODE_CLASS,
-                    TYPE, RDFS_CLASS,
-                    RDFS_COMMENT,
-                    "Identifies an administrative or economic area, relevant to international trade and transport, as defined by the competent national authority in each country."
-            ));
-            locodesGraph.put(UNLOCODE_CLASS_NAME, unlocodeClass.build());
-
-            for (String key : locodesGraph.keySet()) {
-                graphJsonArrayBuilder = Json.createArrayBuilder();
-                JsonObject jsonObject = locodesGraph.get(key);
-                if (key.equalsIgnoreCase(UNLOCODE_CLASS_NAME)) {
-                    setMinimalContext();
-                    contextObjectBuilder.add(UNLOCODE_NS, NS_MAP.get(UNLOCODE_NS));
-                } else {
-                    setContext();
-                    if(jsonObject.containsKey(COUNTRY_SUBDIVISION_PROPERTY)){
-                        contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
-                    }
-                    if(jsonObject.containsKey(StringUtils.join(GEO_NS, ":", "lat"))){
-                        contextObjectBuilder.add(GEO_NS, NS_MAP.get(GEO_NS));
-                        contextObjectBuilder.add(XSD_NS, NS_MAP.get(XSD_NS));
-                    }
-                }
-                outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode/",key,".jsonld");
-                graphJsonArrayBuilder.add(locodesGraph.get(key));
-                super.transform();
-            }
-
 
             JsonObjectBuilder countryClass = Json.createObjectBuilder(Map.of(
                     ID, COUNTRY_CLASS,
                     TYPE, RDFS_CLASS,
                     RDFS_COMMENT, "The two-letter alphabetic country codes, adopted in International Standard ISO 3166-1."));
-            countriesGraph.put(COUNTRY_CLASS_NAME, countryClass.build());
+            vocabGraph.put(COUNTRY_CLASS_NAME, countryClass.build());
 
             JsonObjectBuilder countryCodeProperty = Json.createObjectBuilder(Map.of(
                     ID, PROPERTY_COUNTRY_CODE,
@@ -307,67 +278,22 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             )));
             countryCodeProperty.add(SCHEMA_DOMAIN_INCLUDES, arrayBuilder);
 
-            countriesGraph.put(PROPERTY_COUNTRY_CODE_NAME, countryCodeProperty.build());
+            vocabGraph.put(PROPERTY_COUNTRY_CODE_NAME, countryCodeProperty.build());
 
-            for (String key : countriesGraph.keySet()) {
-                graphJsonArrayBuilder = Json.createArrayBuilder();
-                super.setMinimalContext();
-                contextObjectBuilder.add(UNLOCODE_COUNTRIES_NS, NS_MAP.get(UNLOCODE_COUNTRIES_NS));
-                if(!key.equalsIgnoreCase(COUNTRY_CLASS_NAME)){
-                    contextObjectBuilder.add(RDF_NS, NS_MAP.get(RDF_NS));
-                }
-                if (key.equalsIgnoreCase(PROPERTY_COUNTRY_CODE_NAME)) {
-                    contextObjectBuilder.add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
-                    contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
-                }
-                outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-countries/",key,".jsonld");
-                graphJsonArrayBuilder.add(countriesGraph.get(key));
-                super.transform();
-            }
-
-            JsonObjectBuilder functionClass = Json.createObjectBuilder(Map.of(
-                    ID, FUNCTION_CLASS,
+            JsonObjectBuilder unlocodeClass = Json.createObjectBuilder(Map.of(
+                    ID, UNLOCODE_CLASS,
                     TYPE, RDFS_CLASS,
-                    RDFS_COMMENT, "1-character function classifier code which identifies the existence of " +
-                            "either a facility providing a connection with a specific mode of transport 1 or some other " +
-                            "significant function not directly related to any mode of transport at this location"
+                    RDFS_COMMENT,
+                    "Identifies an administrative or economic area, relevant to international trade and transport, as defined by the competent national authority in each country."
             ));
-            functionsGraph.put(FUNCTION_CLASS_NAME, functionClass.build());
-
-            JsonObjectBuilder functionsProperty = Json.createObjectBuilder(Map.of(
-                    ID, FUNCTIONS_PROPERTY,
-                    TYPE, RDF_PROPERTY,
-                    RDFS_COMMENT, "Related function codes."
-            ));
-            functionsProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
-                    ID, FUNCTION_CLASS
-            )));
-            functionsProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
-                    ID, UNLOCODE_CLASS
-            )));
-            functionsGraph.put(FUNCTIONS_PROPERTY_NAME, functionsProperty.build());
-
-            for (String key : functionsGraph.keySet()) {
-                graphJsonArrayBuilder = Json.createArrayBuilder();
-                super.setMinimalContext();
-                if(!key.equalsIgnoreCase(FUNCTION_CLASS_NAME)){
-                    contextObjectBuilder.add(RDF_NS, NS_MAP.get(RDF_NS));
-                }
-                contextObjectBuilder.add(UNLOCODE_FUNCTIONS_NS, NS_MAP.get(UNLOCODE_FUNCTIONS_NS));
-                if (key.equalsIgnoreCase(FUNCTIONS_PROPERTY_NAME)) {
-                    contextObjectBuilder.add(UNLOCODE_NS, NS_MAP.get(UNLOCODE_NS));
-                }
-                outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-functions/",key,".jsonld");
-                graphJsonArrayBuilder.add(functionsGraph.get(key));
-                super.transform();
-            }
+            vocabGraph.put(UNLOCODE_CLASS_NAME, unlocodeClass.build());
 
             JsonObjectBuilder subdivisionClass = Json.createObjectBuilder(Map.of(
                     ID, SUBDIVISION_CLASS,
                     TYPE, RDFS_CLASS,
                     RDFS_COMMENT, "Code for the administrative division of the country concerned (state, province, department, etc.)."
             ));
-            subdivisionsGraph.put(SUBDIVISION_CLASS_NAME, subdivisionClass.build());
+            vocabGraph.put(SUBDIVISION_CLASS_NAME, subdivisionClass.build());
 
             JsonObjectBuilder countrySubdivProperty = Json.createObjectBuilder(Map.of(
                     ID, COUNTRY_SUBDIVISION_PROPERTY,
@@ -380,7 +306,7 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
             countrySubdivProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
                     ID, UNLOCODE_CLASS
             )));
-            subdivisionsGraph.put(COUNTRY_SUBDIVISION_PROPERTY_NAME, countrySubdivProperty.build());
+            vocabGraph.put(COUNTRY_SUBDIVISION_PROPERTY_NAME, countrySubdivProperty.build());
 
             JsonObjectBuilder subdivTypeProperty = Json.createObjectBuilder(Map.of(
                     ID, SUBDIVISION_TYPE_PROPERTY,
@@ -393,31 +319,82 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
                     ID, SUBDIVISION_CLASS
             )));
 
-            subdivisionsGraph.put(SUBDIVISION_TYPE_PROPERTY_NAME, subdivTypeProperty.build());
+            vocabGraph.put(SUBDIVISION_TYPE_PROPERTY_NAME, subdivTypeProperty.build());
 
-            for (String key : subdivisionsGraph.keySet()) {
-                graphJsonArrayBuilder = Json.createArrayBuilder();
-                super.setMinimalContext();
-                contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
-                if(!key.equalsIgnoreCase(SUBDIVISION_CLASS_NAME)){
-                    contextObjectBuilder.add(RDF_NS, NS_MAP.get(RDF_NS));
-                }
-                if (!key.equalsIgnoreCase(SUBDIVISION_CLASS_NAME)
-                        & !key.equalsIgnoreCase(COUNTRY_SUBDIVISION_PROPERTY_NAME)
-                        & !key.equalsIgnoreCase(SUBDIVISION_TYPE_PROPERTY_NAME)) {
-                    contextObjectBuilder.add(UNLOCODE_COUNTRIES_NS, NS_MAP.get(UNLOCODE_COUNTRIES_NS));
-                }
-                if (key.equalsIgnoreCase(COUNTRY_SUBDIVISION_PROPERTY_NAME)) {
-                    contextObjectBuilder.add(UNLOCODE_NS, NS_MAP.get(UNLOCODE_NS));
-                }
-                if (key.equalsIgnoreCase(SUBDIVISION_TYPE_PROPERTY_NAME)) {
-                    contextObjectBuilder.add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
-                    contextObjectBuilder.add(XSD_NS, NS_MAP.get(XSD_NS));
-                }
-                outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-subdivisions/",key,".jsonld");
-                graphJsonArrayBuilder.add(subdivisionsGraph.get(key));
-                super.transform();
+            JsonObjectBuilder functionClass = Json.createObjectBuilder(Map.of(
+                    ID, FUNCTION_CLASS,
+                    TYPE, RDFS_CLASS,
+                    RDFS_COMMENT, "1-character function classifier code which identifies the existence of " +
+                            "either a facility providing a connection with a specific mode of transport 1 or some other " +
+                            "significant function not directly related to any mode of transport at this location"
+            ));
+            vocabGraph.put(FUNCTION_CLASS_NAME, functionClass.build());
+
+            JsonObjectBuilder functionsProperty = Json.createObjectBuilder(Map.of(
+                    ID, FUNCTIONS_PROPERTY,
+                    TYPE, RDF_PROPERTY,
+                    RDFS_COMMENT, "Related function codes."
+            ));
+            functionsProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
+                    ID, FUNCTION_CLASS
+            )));
+            functionsProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
+                    ID, UNLOCODE_CLASS
+            )));
+            vocabGraph.put(FUNCTIONS_PROPERTY_NAME, functionsProperty.build());
+
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            this.setContext();
+            this.prettyPrint = true;
+            for (String key : vocabGraph.keySet()) {
+                graphJsonArrayBuilder.add(vocabGraph.get(key));
             }
+            outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-vocab.jsonld");
+            super.transform();
+
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            this.setContext();
+            contextObjectBuilder.add(UNLOCODE_FUNC_NS, NS_MAP.get(UNLOCODE_FUNC_NS));
+            this.prettyPrint = true;
+            for (String key : functionsGraph.keySet()) {
+                graphJsonArrayBuilder.add(functionsGraph.get(key));
+            }
+            outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-functions.jsonld");
+            super.transform();
+
+            this.prettyPrint = true;
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            this.setContext();
+            contextObjectBuilder.add(UNLOCODE_NS, NS_MAP.get(UNLOCODE_NS));
+            contextObjectBuilder.add(UNLOCODE_COUNTRIES_NS, NS_MAP.get(UNLOCODE_COUNTRIES_NS));
+            contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
+            contextObjectBuilder.add(GEO_NS, NS_MAP.get(GEO_NS));
+            contextObjectBuilder.add(XSD_NS, NS_MAP.get(XSD_NS));
+            for (String key : locodesGraph.keySet()) {
+                graphJsonArrayBuilder.add(locodesGraph.get(key));
+            }
+            outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode.jsonld");
+            super.transform();
+
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            this.setContext();
+            contextObjectBuilder.add(UNLOCODE_COUNTRIES_NS, NS_MAP.get(UNLOCODE_COUNTRIES_NS));
+            for (String key : countriesGraph.keySet()) {
+                graphJsonArrayBuilder.add(countriesGraph.get(key));
+            }
+            outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-countries.jsonld");
+            super.transform();
+
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            this.setContext();
+            contextObjectBuilder.add(UNLOCODE_COUNTRIES_NS, NS_MAP.get(UNLOCODE_COUNTRIES_NS));
+            contextObjectBuilder.add(UNLOCODE_SUBDIVISIONS_NS, NS_MAP.get(UNLOCODE_SUBDIVISIONS_NS));
+            for (String key : subdivisionsGraph.keySet()) {
+                graphJsonArrayBuilder.add(subdivisionsGraph.get(key));
+            }
+            outputFile = StringUtils.join(UNLOCODE_NS, "/unlocode-subdivisions.jsonld");
+            super.transform();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InvalidFormatException e) {
