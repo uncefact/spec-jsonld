@@ -551,6 +551,8 @@ public class BSPToJSONLDVocabulary extends Transformer {
         jsonldContext.getContextObjectBuilder().add(XSD_NS, NS_MAP.get(XSD_NS));
         jsonldContext.getContextObjectBuilder().add(OWL_NS, NS_MAP.get(OWL_NS));
         jsonldContext.getContextObjectBuilder().add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
+        jsonldContext.getContextObjectBuilder().add("id", ID);
+        jsonldContext.getContextObjectBuilder().add("type", TYPE);
         objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
         jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME, objectBuilder.build());
         for (String key : propertiesGraph.keySet()) {
