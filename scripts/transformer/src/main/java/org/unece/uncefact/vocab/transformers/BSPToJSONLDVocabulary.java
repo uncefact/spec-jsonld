@@ -12,13 +12,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.unece.uncefact.UNType;
 import org.unece.uncefact.vocab.Entity;
+import org.unece.uncefact.vocab.JSONLDContext;
+import org.unece.uncefact.vocab.JSONLDVocabulary;
 import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.*;
 import java.io.*;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.net.URL;
 import java.util.*;
 
 public class BSPToJSONLDVocabulary extends Transformer {
@@ -26,38 +26,57 @@ public class BSPToJSONLDVocabulary extends Transformer {
     protected static String BBIE = "BBIE";
     protected static String ABIE = "ABIE";
     protected static String ASBIE = "ASBIE";
-    protected static String UNECE_ABIE = UNECE_NS+":AggregateBIE";
-    protected static String UNECE_BBIE = UNECE_NS+":BasicBIE";
-    protected static String UNECE_ASBIE = UNECE_NS+":AssociationBIE";
-    protected static String UNECE_TDED = UNECE_NS+":tded";
-    protected static String UNECE_STATUS = UNECE_NS+":status";
-    protected static String UNECE_CEFACT_UN_ID = UNECE_NS+":cefactUNId";
-    protected static String UNECE_CEFACT_BUSINESS_PROCESS = UNECE_NS+":cefactBusinessProcess";
-    protected static String UNECE_CEFACT_ELEMENT_METADATA = UNECE_NS+":cefactElementMetadata";
-    protected static String UNECE_CEFACT_BIE_DOMAIN_CLASS = UNECE_NS+":cefactBieDomainClass";
+    protected static String UNECE_ABIE_PROPERTY_NAME = "AggregateBIE";
+    protected static String UNECE_ABIE_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_ABIE_PROPERTY_NAME);
+    protected static String UNECE_BBIE_PROPERTY_NAME = "BasicBIE";
+    protected static String UNECE_BBIE_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_BBIE_PROPERTY_NAME);
+    protected static String UNECE_ASBIE_PROPERTY_NAME = "AssociationBIE";
+    protected static String UNECE_ASBIE_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_ASBIE_PROPERTY_NAME);
+    protected static String UNECE_TDED_PROPERTY_NAME = "tded";
+    protected static String UNECE_TDED_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_TDED_PROPERTY_NAME);
+    protected static String UNECE_STATUS_PROPERTY_NAME = "status";
+    protected static String UNECE_STATUS_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_STATUS_PROPERTY_NAME);
+    protected static String UNECE_CEFACT_UN_ID_PROPERTY_NAME = "cefactUNId";
+    protected static String UNECE_CEFACT_UN_ID_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_CEFACT_UN_ID_PROPERTY_NAME);
+    protected static String UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY_NAME = "cefactBusinessProcess";
+    protected static String UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY_NAME);
+    protected static String UNECE_CEFACT_ELEMENT_METADATA_PROPERTY_NAME = "cefactElementMetadata";
+    protected static String UNECE_CEFACT_ELEMENT_METADATA_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_CEFACT_ELEMENT_METADATA_PROPERTY_NAME);
+    protected static String UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME = "cefactBieDomainClass";
+    protected static String UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY = StringUtils.join(UNECE_NS, ":", UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME);
 
     Map<String, JsonObject> propertiesGraph = new TreeMap<>();
     Map<String, JsonObject> classesGraph = new TreeMap<>();
 
-    public BSPToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
-        super(inputFile, outputFile,prettyPrint);
+    JSONLDContext jsonldContext = new JSONLDContext();
+    JSONLDVocabulary jsonldVocabulary = new JSONLDVocabulary();
+
+    public JSONLDContext getJsonldContext() {
+        return jsonldContext;
     }
 
-    protected void setContext (){
-        super.setContext();
-        for (String ns : Arrays.asList(CEFACT_NS)){
-            contextObjectBuilder.add(ns, NS_MAP.get(ns));
+    public JSONLDVocabulary getJsonldVocabulary() {
+        return jsonldVocabulary;
+    }
+    public BSPToJSONLDVocabulary(String inputFile, String defaultFile) {
+        super(inputFile, defaultFile);
+    }
+
+    protected JsonObjectBuilder getContext (){
+        JsonObjectBuilder result = super.getMinimalContext();
+        for (String ns : Arrays.asList(UNECE_NS)){
+            result.add(ns, NS_MAP.get(ns));
         }
+        return result;
     }
 
     public void transform() throws IOException, InvalidFormatException {
-        try {
-            Files.createDirectory(Paths.get(UNECE_NS));
-        } catch (FileAlreadyExistsException e) {
-            System.err.println(String.format("Output directory %s already exists, please remove it and repeat.", UNLOCODE_NS));
-            throw e;
+        Workbook workbook;
+        if (inputFile == null){
+            workbook = WorkbookFactory.create(getClass().getResourceAsStream(defaultFile));
+        } else {
+            workbook = WorkbookFactory.create(new File(inputFile));
         }
-        Workbook workbook = WorkbookFactory.create(new File(inputFile));
         readInputFileToGraphArray(workbook);
     }
 
@@ -179,10 +198,10 @@ public class BSPToJSONLDVocabulary extends Transformer {
             for (Entity entity : entities) {
                 JsonObjectBuilder metadata = Json.createObjectBuilder();
                 metadata.add(ID, StringUtils.join(CEFACT_NS,":",entity.getName()));
-                metadata.add(TYPE, UNECE_ABIE);
-                metadata.add(UNECE_CEFACT_UN_ID, entity.getId());
+                metadata.add(TYPE, UNECE_ABIE_PROPERTY);
+                metadata.add(UNECE_CEFACT_UN_ID_PROPERTY, entity.getId());
                 metadata.add(RDFS_COMMENT, entity.getDescription());
-                metadata.add(UNECE_CEFACT_BUSINESS_PROCESS, entity.getContext());
+                metadata.add(UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY, entity.getContext());
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
             }
@@ -204,7 +223,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
 
             }
             rdfClass.add(RDFS_LABEL, id);
-            rdfClass.add(UNECE_CEFACT_ELEMENT_METADATA, metadataJsonArrayBuilder.build());
+            rdfClass.add(UNECE_CEFACT_ELEMENT_METADATA_PROPERTY, metadataJsonArrayBuilder.build());
             classesGraph.put(id, rdfClass.build());
         }
 
@@ -226,13 +245,13 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 JsonObjectBuilder metadata = Json.createObjectBuilder();
                 metadata.add(ID, StringUtils.join(CEFACT_NS,":",entity.getName()));
                 if (entity.getType().equalsIgnoreCase(BBIE)) {
-                    metadata.add(TYPE, UNECE_BBIE);
+                    metadata.add(TYPE, UNECE_BBIE_PROPERTY);
                     rangeBBIE = entity.getRepresentationTerm();
                     if (StringUtils.isNotBlank(entity.getTDED()) && !".".equals(entity.getTDED())) {
-                        metadata.add(UNECE_TDED, entity.getTDED());
+                        metadata.add(UNECE_TDED_PROPERTY, entity.getTDED());
                     }
                 } else if (entity.getType().equalsIgnoreCase(ASBIE)) {
-                    metadata.add(TYPE, UNECE_ASBIE);
+                    metadata.add(TYPE, UNECE_ASBIE_PROPERTY);
                     rangeASBIE = entity.getAssociatedObjectClass();
                     if (repeatedClassKeys.containsKey(entity.getAssociatedObjectClass())) {
                         if(repeatedClassKeys.get(entity.getAssociatedObjectClass()) == 2) {
@@ -248,9 +267,9 @@ public class BSPToJSONLDVocabulary extends Transformer {
                         }
                     }
                 }
-                metadata.add(UNECE_CEFACT_UN_ID, entity.getId());
-                metadata.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, StringUtils.join(CEFACT_NS,":",entity.getCefactBieDomainClass()));
-                metadata.add(UNECE_CEFACT_BUSINESS_PROCESS, entity.getContext());
+                metadata.add(UNECE_CEFACT_UN_ID_PROPERTY, entity.getId());
+                metadata.add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY, StringUtils.join(CEFACT_NS,":",entity.getCefactBieDomainClass()));
+                metadata.add(UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY, entity.getContext());
                 String description = entity.getDescription();
                 String publicationComment = entity.getPublicationComment();
                 if (StringUtils.isNotBlank(publicationComment)) {
@@ -258,7 +277,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 }
                 metadata.add(RDFS_COMMENT, description);
                 if (publicationComment.startsWith("Deprecated")) {
-                    metadata.add(UNECE_STATUS, "deprecated");
+                    metadata.add(UNECE_STATUS_PROPERTY, "deprecated");
                 }
                 // TODO: properly implement
                 String domainKey = entity.getObjectClassTerm();
@@ -276,7 +295,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     }
                 }
                 domain.add(domainKey);
-                metadata.add("unece:domainName", domainKey);
+                metadata.add(StringUtils.join(UNECE_NS,":","domainName"), domainKey);
 
                 comment.add(entity.getDescription());
                 metadataJsonArrayBuilder.add(metadata);
@@ -323,38 +342,231 @@ public class BSPToJSONLDVocabulary extends Transformer {
                 rdfProperty.add(RDFS_COMMENT, commentJsonArrayBuilder.build());
             }
             rdfProperty.add(RDFS_LABEL, id);
-            rdfProperty.add(UNECE_CEFACT_ELEMENT_METADATA, metadataJsonArrayBuilder.build());
+            rdfProperty.add(UNECE_CEFACT_ELEMENT_METADATA_PROPERTY, metadataJsonArrayBuilder.build());
             propertiesGraph.put(id, rdfProperty.build());
         }
 
-        try {
-            for (String key : propertiesGraph.keySet()) {
-                graphJsonArrayBuilder = Json.createArrayBuilder();
-                JsonObject jsonObject = propertiesGraph.get(key);
-                setContext();
-                if (jsonObject.get(SCHEMA_RANGE_INCLUDES).asJsonObject().getString(ID).startsWith(XSD_NS)){
-                    contextObjectBuilder.add(XSD_NS, NS_MAP.get(XSD_NS));
-                }
-                contextObjectBuilder.add(OWL_NS, NS_MAP.get(OWL_NS));
-                contextObjectBuilder.add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
-                JsonObjectBuilder objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
-                contextObjectBuilder.add(UNECE_CEFACT_BIE_DOMAIN_CLASS, objectBuilder.build());
-                outputFile = StringUtils.join(UNECE_NS, "/",key,".jsonld");
-                graphJsonArrayBuilder.add(jsonObject);
-                super.transform();
+        /*for (String key : propertiesGraph.keySet()) {
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            JsonObject jsonObject = propertiesGraph.get(key);
+            setContext();
+            if (jsonObject.get(SCHEMA_RANGE_INCLUDES).asJsonObject().getString(ID).startsWith(XSD_NS)){
+                contextObjectBuilder.add(XSD_NS, NS_MAP.get(XSD_NS));
             }
-            for (String key : classesGraph.keySet()) {
-                graphJsonArrayBuilder = Json.createArrayBuilder();
-                setContext();
-                outputFile = StringUtils.join(UNECE_NS, "/",key,".jsonld");
-                graphJsonArrayBuilder.add(classesGraph.get(key));
-                super.transform();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidFormatException e) {
-            throw new RuntimeException(e);
+            contextObjectBuilder.add(OWL_NS, NS_MAP.get(OWL_NS));
+            contextObjectBuilder.add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
+            contextObjectBuilder.add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY, objectBuilder.build());
+            outputFile = StringUtils.join(UNECE_NS, "/",key,".jsonld");
+            graphJsonArrayBuilder.add(jsonObject);
+            super.transform();
         }
+        for (String key : classesGraph.keySet()) {
+            graphJsonArrayBuilder = Json.createArrayBuilder();
+            setContext();
+            outputFile = StringUtils.join(UNECE_NS, "/",key,".jsonld");
+            graphJsonArrayBuilder.add(classesGraph.get(key));
+            super.transform();
+        }*/
+        jsonldVocabulary.setContextObjectBuilder(getContext());
+        jsonldVocabulary.getContextObjectBuilder().add(XSD_NS, NS_MAP.get(XSD_NS));
+        jsonldVocabulary.getContextObjectBuilder().add(OWL_NS, NS_MAP.get(OWL_NS));
+        jsonldVocabulary.getContextObjectBuilder().add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
+        jsonldVocabulary.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY, objectBuilder.build());
+        for (String key : propertiesGraph.keySet()) {
+            jsonldVocabulary.getGraphJsonArrayBuilder().add(propertiesGraph.get(key));
+        }
+        for (String key : classesGraph.keySet()) {
+            jsonldVocabulary.getGraphJsonArrayBuilder().add(classesGraph.get(key));
+        }
+
+        JsonObjectBuilder aggregateBIE = Json.createObjectBuilder(Map.of(
+                ID, UNECE_ABIE_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_ABIE_PROPERTY_NAME,
+                RDFS_COMMENT, "Aggregate Business Information Entity"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(aggregateBIE.build());
+
+        JsonObjectBuilder basicBIE = Json.createObjectBuilder(Map.of(
+                ID, UNECE_BBIE_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_BBIE_PROPERTY_NAME,
+                RDFS_COMMENT, "Basic Business Information Entity contained within the ABIE"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(basicBIE.build());
+
+        JsonObjectBuilder associationBIE = Json.createObjectBuilder(Map.of(
+                ID, UNECE_ASBIE_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_ASBIE_PROPERTY_NAME,
+                RDFS_COMMENT, "Associated (Aggregate) Business Information Entity, associated with the ABIE"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(associationBIE.build());
+
+        JsonObjectBuilder tded = Json.createObjectBuilder(Map.of(
+                ID, UNECE_ASBIE_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_ASBIE_PROPERTY_NAME,
+                RDFS_COMMENT, "TDED reference number"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(tded.build());
+
+        JsonObjectBuilder status = Json.createObjectBuilder(Map.of(
+                ID, UNECE_STATUS_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_STATUS_PROPERTY_NAME,
+                RDFS_COMMENT, "Status"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(status.build());
+
+        JsonObjectBuilder cefactUNId = Json.createObjectBuilder(Map.of(
+                ID, UNECE_CEFACT_UN_ID_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_CEFACT_UN_ID_PROPERTY_NAME,
+                RDFS_COMMENT, "TBG assigned Unique ID for approved Library Objects"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactUNId.build());
+
+        JsonObjectBuilder cefactBusinessProcess = Json.createObjectBuilder(Map.of(
+                ID, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY_NAME,
+                RDFS_COMMENT, "CEFACT Business Process"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactBusinessProcess.build());
+
+        JsonObjectBuilder cefactElementMetadata = Json.createObjectBuilder(Map.of(
+                ID, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY,
+                TYPE, RDF_SEQ,
+                RDFS_LABEL, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY_NAME,
+                RDFS_COMMENT, "CEFACT Element Metadata"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactElementMetadata.build());
+
+        JsonObjectBuilder cefactBieDomainClass = Json.createObjectBuilder(Map.of(
+                ID, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY,
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME,
+                RDFS_COMMENT, "CEFACT Business Process"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactBieDomainClass.build());
+
+        JsonObjectBuilder rec20Class = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec20Code"),
+                TYPE, RDFS_CLASS,
+                RDFS_LABEL, "UNECERec20Code",
+                RDFS_COMMENT, "Recommendations 20"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(rec20Class.build());
+
+        JsonObjectBuilder rec21Class = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec21Code"),
+                TYPE, RDFS_CLASS,
+                RDFS_LABEL, "UNECERec21Code",
+                RDFS_COMMENT, "Recommendations 21"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(rec21Class.build());
+
+        JsonObjectBuilder rec24Class = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec24Code"),
+                TYPE, RDFS_CLASS,
+                RDFS_LABEL, "UNECERec24Code",
+                RDFS_COMMENT, "Recommendations 24"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(rec24Class.build());
+
+        JsonObjectBuilder rec28Class = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec28Code"),
+                TYPE, RDFS_CLASS,
+                RDFS_LABEL, "UNECERec28Code",
+                RDFS_COMMENT, "Recommendations 28"
+        ));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(rec28Class.build());
+
+        JsonObjectBuilder levelCategoryProperty = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","levelCategory"),
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, "levelCategory",
+                RDFS_COMMENT, "Level Category."
+        ));
+        levelCategoryProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(XSD_NS,":","string")
+        )));
+        levelCategoryProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec20Code")
+        )));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(levelCategoryProperty.build());
+
+        JsonObjectBuilder symbolProperty = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","symbol"),
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, "symbol",
+                RDFS_COMMENT, "Symbol."
+        ));
+        symbolProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(XSD_NS,":","string")
+        )));
+        symbolProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec20Code")
+        )));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(symbolProperty.build());
+
+        JsonObjectBuilder conversionFactorProperty = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","conversionFactor"),
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, "conversionFactor",
+                RDFS_COMMENT, "Conversion Factor."
+        ));
+        conversionFactorProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(XSD_NS,":","string")
+        )));
+        conversionFactorProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec20Code")
+        )));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(conversionFactorProperty.build());
+
+        JsonObjectBuilder statusProperty = Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","status"),
+                TYPE, RDF_PROPERTY,
+                RDFS_LABEL, "status",
+                RDFS_COMMENT, "Status."
+        ));
+        statusProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(XSD_NS,":","string")
+        )));
+        statusProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
+                ID, StringUtils.join(UNECE_NS,":","UNECERec20Code")
+        )));
+        jsonldVocabulary.getGraphJsonArrayBuilder().add(statusProperty.build());
+
+
+        jsonldContext.getContextObjectBuilder().add("@vocab", NS_MAP.get(UNECE_NS));
+        jsonldContext.getContextObjectBuilder().add(UNECE_NS, NS_MAP.get(UNECE_NS));
+        jsonldContext.getContextObjectBuilder().add(RDF_NS, NS_MAP.get(RDF_NS));
+        jsonldContext.getContextObjectBuilder().add(RDFS_NS, NS_MAP.get(RDFS_NS));
+        jsonldContext.getContextObjectBuilder().add(XSD_NS, NS_MAP.get(XSD_NS));
+        jsonldContext.getContextObjectBuilder().add(OWL_NS, NS_MAP.get(OWL_NS));
+        jsonldContext.getContextObjectBuilder().add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
+        objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
+        jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME, objectBuilder.build());
+        for (String key : propertiesGraph.keySet()) {
+            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+        }
+        for (String key : classesGraph.keySet()) {
+            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+        }
+        jsonldContext.getContextObjectBuilder().add(UNECE_ABIE_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_ABIE_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_BBIE_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_BBIE_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_ASBIE_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_ASBIE_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_TDED_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_TDED_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_STATUS_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_STATUS_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_UN_ID_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_CEFACT_UN_ID_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_ELEMENT_METADATA_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY)).build());
+        jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY)).build());
+
     }
 
     Object getData(String dataType, Set<String> TDED) {

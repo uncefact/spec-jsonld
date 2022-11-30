@@ -1,21 +1,35 @@
 package org.unece.uncefact.vocab.transformers;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.unece.uncefact.vocab.JSONLDVocabulary;
+import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class REC20ToJSONLDVocabulary extends WorkBookTransformer {
 
-    public REC20ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
-        super(inputFile, outputFile, prettyPrint);
-        contextObjectBuilder.add(REC20_NS, NS_MAP.get(REC20_NS));
+    public REC20ToJSONLDVocabulary(String inputFile, String defaultFile) {
+        super(inputFile, defaultFile);
     }
 
     public void readInputFileToGraphArray(final Object object) {
+        JSONLDVocabulary JSONLDVocabulary = new JSONLDVocabulary(StringUtils.join(REC20_NS, ".jsonld"), true);
+        JSONLDVocabulary.setContextObjectBuilder(getContext());
+        JSONLDVocabulary.getContextObjectBuilder().add(REC20_NS, NS_MAP.get(REC20_NS));
+
         Workbook workbook = (Workbook) object;
         Sheet sheet = workbook.getSheetAt(2);
         Iterator<Row> rowIterator = sheet.rowIterator();
@@ -56,8 +70,9 @@ public class REC20ToJSONLDVocabulary extends WorkBookTransformer {
                 rdfClass.add(StringUtils.join(UNECE_NS,":","conversionFactor"), conversionFactor);
             if (StringUtils.isNotEmpty(status))
                 rdfClass.add(StringUtils.join(UNECE_NS,":","status"), status);
-            graphJsonArrayBuilder.add(rdfClass);
+            JSONLDVocabulary.getGraphJsonArrayBuilder().add(rdfClass);
         }
+        vocabularies.add(JSONLDVocabulary);
     }
 
 }

@@ -13,6 +13,8 @@ import java.util.TreeSet;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import static org.unece.uncefact.vocab.Transformer.*;
+
 public class TransformationRunner {
     final static Options options = new Options();
 
@@ -21,16 +23,20 @@ public class TransformationRunner {
         String version = mainAttributes.getValue("Implementation-Version");
 
         Option transformationTypeOption = new Option("t", true, "transformation type.\n" +
-                "Allowed values: BSP, REC20.\n" +
-                "Default value: BSP.");
-        Option inputFileOption = new Option("i", true, "an input file to be transformed. Accepted format for BSP type is xls. Required.");
-        Option outputFileOption = new Option("o", true, "an output file to be created as a result of transformation. Default value: output.jsonld.");
+                String.format("Allowed values: %s, %s, %s, %s, %s, %s.\n", UNECE_NS, REC20_NS, REC21_NS, REC24_NS, REC28_NS, UNLOCODE_NS) +
+                String.format("Default value: %s.", UNECE_NS));
+        Option inputFileOption = new Option("i", true, "an input file or files to be transformed. \n" +
+                String.format("- %s type requires two files - XLSX with BSP subset and text file with UNCL code lists\n", UNECE_NS) +
+                String.format("- %s type requires a XLSX file with Recommendation 20 code list\n", REC20_NS) +
+                String.format("- %s type requires a XLS file with Recommendation 21 code list\n", REC21_NS) +
+                String.format("- %s type requires a XLS file with Recommendation 24 code list\n", REC24_NS) +
+                String.format("- %s type requires a XLS file with Recommendation 28 code list\n", REC28_NS) +
+                String.format("- %s type requires CSV files with UN/LOCODE and Subdivision codes\n", UNLOCODE_NS));
         Option prettyPrintOption = new Option("p", "pretty-print",false, "an output file to be created as a result of transformation. Default value: output.jsonld.");
         Option versionOption = new Option("?", "version", false, "display this help.");
 
         options.addOption(transformationTypeOption);
         options.addOption(inputFileOption);
-        options.addOption(outputFileOption);
         options.addOption(prettyPrintOption);
         options.addOption(versionOption);
 
@@ -42,14 +48,11 @@ public class TransformationRunner {
         if (cmd.hasOption(versionOption.getOpt())) {
             formatter.printHelp(String.format("java -jar vocab-transformer-%s.jar", version), options);
             return;
-        } else if(!cmd.hasOption(inputFileOption.getOpt())){
-            throw new MissingOptionException(inputFileOption.getOpt());
         }
 
         Set<String> inputFileNames = new TreeSet<>();
-        String outputFileName = "output.jsonld";
         boolean prettyPrint = false;
-        String transformationType = "bsp";
+        String transformationType = UNECE_NS;
         Transformer transformer = null;
         Iterator<Option> optionIterator = cmd.iterator();
         while (optionIterator.hasNext()) {
@@ -57,40 +60,74 @@ public class TransformationRunner {
             String opt = StringUtils.defaultIfEmpty(option.getOpt(), "");
             if (opt.equals(inputFileOption.getOpt())) {
                 inputFileNames.add(option.getValue());
-            } else if (opt.equals(outputFileOption.getOpt())) {
-                outputFileName = option.getValue();
             } else if (opt.equals(prettyPrintOption.getOpt())) {
                 prettyPrint = Boolean.TRUE;
             } else if (opt.equals(transformationTypeOption.getOpt())) {
                 transformationType = option.getValue();
             }
         }
-        String inputFileName = inputFileNames.iterator().next();
+        String inputFileName = null;
+        if (inputFileNames.isEmpty()){
+            //default value
+            inputFileName = null;
+        } else {
+            inputFileName = inputFileNames.iterator().next();
+        }
+
         switch (transformationType.toLowerCase()) {
-            case "bsp":
-                transformer = new BSPToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+            case UNECE_NS:
+                String uneceFile = null;
+                String unclFile = null;
+                Iterator<String> iterator = inputFileNames.iterator();
+                if (!inputFileNames.isEmpty()){
+                    while (iterator.hasNext()){
+                        String fileName = iterator.next();
+                        if (fileName.endsWith(".xlsx")){
+                            uneceFile = fileName;
+                        } else {
+                            unclFile = iterator.next();
+                        }
+                    }
+                }
+                BSPToJSONLDVocabulary bspTransformer = new BSPToJSONLDVocabulary(uneceFile, "/BSP D20A Context CCL.xlsx");
+                UNCLToJSONLDVocabulary unclTransformer = new UNCLToJSONLDVocabulary(unclFile, "/UNCL.21B");
+                bspTransformer.transform();
+                unclTransformer.transform();
+                JSONLDVocabulary bspVocabulary = bspTransformer.getJsonldVocabulary();
+                JSONLDVocabulary unclVocabulary = unclTransformer.getJsonldVocabulary();
+                JSONLDVocabulary combinedVocabulary = new JSONLDVocabulary();
+                combinedVocabulary.setContextObjectBuilder(bspVocabulary.getContextObjectBuilder().addAll(unclVocabulary.getContextObjectBuilder()));
+                combinedVocabulary.setGraphJsonArrayBuilder(bspVocabulary.getGraphJsonArrayBuilder().addAll(unclVocabulary.getGraphJsonArrayBuilder()));
+                new FileGenerator().generateFile(combinedVocabulary.getContextObjectBuilder(), combinedVocabulary.getGraphJsonArrayBuilder(), true, String.format("%s.jsonld", UNECE_NS));
+                JSONLDContext bspContext = bspTransformer.getJsonldContext();
+                JSONLDContext unclContext = unclTransformer.getJsonldContext();
+                JSONLDContext combinedContext = new JSONLDContext();
+                combinedContext.setContextObjectBuilder(bspContext.getContextObjectBuilder().addAll(unclContext.getContextObjectBuilder()));
+                new FileGenerator().generateFile(combinedContext.getContextObjectBuilder(), null, true, String.format("%s-context.jsonld", UNECE_NS));
                 break;
-            case "rec20":
-                transformer = new REC20ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+            case REC20_NS:
+                transformer = new REC20ToJSONLDVocabulary(inputFileName, "/rec20_Rev17e-2021.xlsx");
                 break;
-            case "rec21":
-                transformer = new REC21ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+            case REC21_NS:
+                transformer = new REC21ToJSONLDVocabulary(inputFileName, "/rec21_Rev12e_Annex-V-VI_2021.xls");
                 break;
-            case "rec24":
-                transformer = new REC24ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+            case REC24_NS:
+                transformer = new REC24ToJSONLDVocabulary(inputFileName, "/rec24_Rev6e_2017.xls");
                 break;
-            case "rec28":
-                transformer = new REC28ToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
+            case REC28_NS:
+                transformer = new REC28ToJSONLDVocabulary(inputFileName, "/Rec28_Rev4.2e_2018.xls");
                 break;
-            case "uncl":
-                transformer = new UNCLToJSONLDVocabulary(inputFileName, outputFileName, prettyPrint);
-                break;
-            case "unlocode":
-                transformer = new UNLOCODEToJSONLDVocabulary(prettyPrint);
-                transformer.setInputFiles(inputFileNames);
+            case UNLOCODE_NS:
+                Set<String> defaultInputNames = new TreeSet<>();
+                defaultInputNames.add("/loc221csv/2022-1 UNLOCODE CodeListPart1.csv");
+                defaultInputNames.add("/loc221csv/2022-1 UNLOCODE CodeListPart2.csv");
+                defaultInputNames.add("/loc221csv/2022-1 UNLOCODE CodeListPart3.csv");
+                defaultInputNames.add("/loc221csv/2022-1 SubdivisionCodes.csv");
+                transformer = new UNLOCODEToJSONLDVocabulary(inputFileNames, defaultInputNames, prettyPrint);
                 break;
         }
-        transformer.transform();
+        if (transformer!=null)
+            transformer.transform();
     }
 
     public static Attributes readProperties() throws IOException {

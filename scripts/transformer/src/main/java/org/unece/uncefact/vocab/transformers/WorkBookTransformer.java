@@ -7,14 +7,21 @@ import org.unece.uncefact.vocab.Transformer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public abstract class WorkBookTransformer extends Transformer {
-    protected WorkBookTransformer(String inputFile, String outputFile, boolean prettyPrint) {
-        super(inputFile, outputFile, prettyPrint);
+
+    public WorkBookTransformer(String inputFile, String defaultFile) {
+        super(inputFile, defaultFile);
     }
 
     public void transform() throws IOException, InvalidFormatException {
-        Workbook workbook = WorkbookFactory.create(new File(inputFile));
+        Workbook workbook;
+        if (inputFile == null){
+            workbook = WorkbookFactory.create(getClass().getResourceAsStream(defaultFile));
+        } else {
+            workbook = WorkbookFactory.create(new File(inputFile));
+        }
         readInputFileToGraphArray(workbook);
         super.transform();
     }

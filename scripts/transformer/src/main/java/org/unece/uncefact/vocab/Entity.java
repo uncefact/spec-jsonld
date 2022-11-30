@@ -2,10 +2,7 @@ package org.unece.uncefact.vocab;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class Entity {
     /**

@@ -15,7 +15,9 @@ public class FileGenerator {
                              final JsonArrayBuilder graphJsonArrayBuilder, boolean prettyPrint, String outputFile) {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
         jsonObjectBuilder.add("@context", contextObjectBuilder.build());
-        jsonObjectBuilder.add("@graph", graphJsonArrayBuilder.build());
+        if (graphJsonArrayBuilder!=null) {
+            jsonObjectBuilder.add("@graph", graphJsonArrayBuilder.build());
+        }
 
         Map<String, Boolean> config = new HashMap<>();
         if (prettyPrint) {
@@ -23,7 +25,7 @@ public class FileGenerator {
         }
         StringWriter stringWriter = new StringWriter();
         JsonWriterFactory writerFactory = Json.createWriterFactory(config);
-        ;
+
         try (JsonWriter jsonWriter = writerFactory.createWriter(stringWriter)) {
             jsonWriter.writeObject(jsonObjectBuilder.build());
         }
