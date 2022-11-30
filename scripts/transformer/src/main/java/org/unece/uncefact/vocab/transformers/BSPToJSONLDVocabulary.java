@@ -545,7 +545,6 @@ public class BSPToJSONLDVocabulary extends Transformer {
         jsonldVocabulary.getGraphJsonArrayBuilder().add(statusProperty.build());
 
 
-        jsonldContext.getContextObjectBuilder().add("@vocab", NS_MAP.get(UNECE_NS));
         jsonldContext.getContextObjectBuilder().add(UNECE_NS, NS_MAP.get(UNECE_NS));
         jsonldContext.getContextObjectBuilder().add(RDF_NS, NS_MAP.get(RDF_NS));
         jsonldContext.getContextObjectBuilder().add(RDFS_NS, NS_MAP.get(RDFS_NS));

@@ -362,7 +362,6 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
         jsonldVocabulary.getContextObjectBuilder().add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
 
         JSONLDContext jsonldContext = new JSONLDContext(StringUtils.join("unlocode-vocab-context.jsonld"), true);
-        jsonldContext.getContextObjectBuilder().add("@vocab", NS_MAP.get(UNLOCODE_VOCAB_NS));
         jsonldContext.getContextObjectBuilder().add(UNLOCODE_VOCAB_NS, NS_MAP.get(UNLOCODE_VOCAB_NS));
         jsonldContext.getContextObjectBuilder().add(RDF_NS, NS_MAP.get(RDF_NS));
         jsonldContext.getContextObjectBuilder().add(RDFS_NS, NS_MAP.get(RDFS_NS));
