@@ -2,39 +2,66 @@ package org.unece.uncefact.vocab.transformers;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.unece.uncefact.vocab.JSONLDContext;
+import org.unece.uncefact.vocab.JSONLDVocabulary;
 import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.function.IntPredicate;
 
 public class UNCLToJSONLDVocabulary extends Transformer {
     protected static String UNCL_NS = "uncl";
 
-    public UNCLToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
-        super(inputFile, outputFile, prettyPrint);
+    JSONLDContext jsonldContext;
+    JSONLDVocabulary jsonldVocabulary;
+
+    public JSONLDContext getJsonldContext() {
+        return jsonldContext;
+    }
+
+    public JSONLDVocabulary getJsonldVocabulary() {
+        return jsonldVocabulary;
+    }
+
+    public UNCLToJSONLDVocabulary(String inputFile, String defaultFile) {
+        super(inputFile, defaultFile);
+        this.jsonldContext = new JSONLDContext();
+        this.jsonldVocabulary = new JSONLDVocabulary();
     }
 
     public void transform() throws IOException, InvalidFormatException {
-        BufferedReader reader = Files.newBufferedReader(Paths.get(inputFile), Charset.forName("ISO-8859-1"));
+        try {
+            Files.createDirectory(Paths.get(UNCL_NS));
+        } catch (IOException e) {
+            System.err.printf("Output directory %s already exists, please remove it and repeat.%n", UNCL_NS);
+        }
+        BufferedReader reader;
+        if (inputFile == null){
+            reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(defaultFile),Charset.forName("ISO-8859-1")));
+        } else {
+            reader = Files.newBufferedReader(Paths.get(inputFile), Charset.forName("ISO-8859-1"));
+        }
         readInputFileToGraphArray(reader);
+        super.transform();
     }
     public void readInputFileToGraphArray(final Object object) {
+        Map<String, JsonObject> classesGraph = new TreeMap<>();
         String codeNS = null;
         BufferedReader reader = (BufferedReader)object;
+        JSONLDVocabulary vocabulary = new JSONLDVocabulary();
         try {
             String line = reader.readLine();
             while (line != null) {
@@ -85,8 +112,15 @@ public class UNCLToJSONLDVocabulary extends Transformer {
                         String name = null;
                         do {
                             codeLine = reader.readLine();
-                            if (codeLine == null)
+                            if (codeLine == null) {
+                                jsonldVocabulary.setContextObjectBuilder(getContext());
+                                JSONLDContext jsonldContext = new JSONLDContext();
+                                for (String key: classesGraph.keySet()){
+                                    jsonldVocabulary.getGraphJsonArrayBuilder().add(classesGraph.get(key));
+                                    jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+                                }
                                 return;
+                            }
                         } while (StringUtils.isEmpty(codeLine));
 
                         String changeIndicator = null;
@@ -154,7 +188,7 @@ public class UNCLToJSONLDVocabulary extends Transformer {
                             if (changeIndicator.equalsIgnoreCase("+"))
                                 rdfClass.add(StringUtils.join(UNECE_NS, ":", "status"), "added");
                         }
-                        graphJsonArrayBuilder.add(rdfClass);
+                        vocabulary.getGraphJsonArrayBuilder().add(rdfClass);
                     }
                     while (StringUtils.isEmpty(line));
                 }
@@ -163,24 +197,23 @@ public class UNCLToJSONLDVocabulary extends Transformer {
                     line = reader.readLine();
                 } else {
                     JsonObjectBuilder rdfClass = Json.createObjectBuilder();
-                    rdfClass.add(ID, StringUtils.join(codeNS, ":", String.format("UNCL%sCode", codeListID)));
+                    rdfClass.add(ID, StringUtils.join(UNECE_NS, ":", String.format("UNCL%sCode", codeListID)));
                     rdfClass.add(TYPE, RDFS_CLASS);
                     rdfClass.add(RDFS_COMMENT, codeListDescString);
                     rdfClass.add(RDFS_LABEL, codeListName);
-                    graphJsonArrayBuilder.add(rdfClass);
+                    classesGraph.put(String.format("UNCL%sCode", codeListID), rdfClass.build());
+                    vocabulary.setOutputFile(StringUtils.join(UNCL_NS, "/", codeNS, ".jsonld"));
+                    vocabulary.setPrettyPrint(true);
+                    vocabulary.setContextObjectBuilder(getContext());
+                    vocabulary.getContextObjectBuilder().add(codeNS, String.format(NS_MAP.get(UNECE_NS).concat("%s#"), codeNS));
+                    vocabularies.add(vocabulary);
+                    vocabulary = new JSONLDVocabulary();
 
-                    outputFile = codeNS.concat(".jsonld");
-                    contextObjectBuilder.add(codeNS, String.format("https://service.unece.org/trade/uncefact/vocabulary/uncefact/%s#", codeNS));
-                    super.transform();
-                    setContext();
-                    graphJsonArrayBuilder = Json.createArrayBuilder();
                 }
             }
             reader.close();
         }catch (IOException e){
             System.err.println(e.getMessage());
-        } catch (InvalidFormatException e) {
-            throw new RuntimeException(e);
         }
     }
     static String stripChars(String s, IntPredicate include) {

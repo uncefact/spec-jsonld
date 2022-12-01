@@ -3,22 +3,13 @@ package org.unece.uncefact.vocab;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.unece.uncefact.vocab.transformers.UNCLToJSONLDVocabulary;
 
 import javax.json.*;
-import javax.json.stream.JsonGenerator;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class Transformer {
+
     public static String ID = "@id";
     public static String TYPE = "@type";
     public static String VALUE = "@value";
@@ -26,11 +17,12 @@ public abstract class Transformer {
     public static String OWL_NS = "owl";
     public static String RDFS_NS = "rdfs";
     public static String RDF_NS = "rdf";
-    public static String UNECE_NS = "unece";
+    public static final String UNECE_NS = "unece";
     public static String CEFACT_NS = "cefact";
     public static String XSD_NS = "xsd";
     public static String RDFS_CLASS = RDFS_NS+":Class";
     public static String RDF_PROPERTY = RDF_NS+":Property";
+    public static String RDF_SEQ = RDF_NS+":Seq";
     public static String RDF_VALUE = RDF_NS+":value";
     public static String RDFS_COMMENT = RDFS_NS+":comment";
     public static String RDFS_LABEL = RDFS_NS+":label";
@@ -38,31 +30,28 @@ public abstract class Transformer {
     public static String SCHEMA_DOMAIN_INCLUDES = SCHEMA_NS+":domainIncludes";
     public static String SCHEMA_RANGE_INCLUDES = SCHEMA_NS+":rangeIncludes";
     protected String inputFile;
+    protected String defaultFile;
     protected Set<String> inputFiles;
-    protected String outputFile;
-
-    protected boolean prettyPrint;
+    protected Set<String> defaultInputFiles;
 
     protected JsonObject context;
 
     protected JsonObjectBuilder jsonObjectBuilder;
-    protected JsonArrayBuilder graphJsonArrayBuilder;
 
-    protected JsonObjectBuilder contextObjectBuilder;
+    protected List<JSONLDVocabulary> vocabularies = new ArrayList<>();
+    protected List<JSONLDContext> contexts = new ArrayList<>();
 
-    protected static String UNLOCODE_NS = "unlcd";
-    protected static String UNLOCODE_SUBDIVISIONS_NS = "unlcds";
-    protected static String UNLOCODE_COUNTRIES_NS = "unlcdc";
-    protected static String UNLOCODE_VOCAB_NS = "unlcdv";
-    protected static String UNLOCODE_FUNC_NS = "unlcdf";
-    public static String GEO_NS = "geo";
-    protected static String REC20_NS = "rec20";
-    protected static String REC21_NS = "rec21";
-    protected static String REC24_NS = "rec24";
-    protected static String REC28_NS = "rec28";
-
-    /*protected static String DOMAIN = "service.unece.org";*/
-    protected static String DOMAIN = "dmvc7xzscpizo.cloudfront.net";
+    public static final String UNLOCODE_NS = "unlcd";
+    public static final String UNLOCODE_SUBDIVISIONS_NS = "unlcds";
+    public static final String UNLOCODE_COUNTRIES_NS = "unlcdc";
+    public static final String UNLOCODE_VOCAB_NS = "unlcdv";
+    protected static final String UNLOCODE_FUNC_NS = "unlcdf";
+    public static final String GEO_NS = "geo";
+    public static final String REC20_NS = "rec20";
+    public static final String REC21_NS = "rec21";
+    public static final String REC24_NS = "rec24";
+    public static final String REC28_NS = "rec28";
+    public static final String DOMAIN = "vocabulary.uncefact.org";
 
 
     protected static Map<String, String> NS_MAP = new HashMap<>();
@@ -75,7 +64,7 @@ public abstract class Transformer {
         NS_MAP.put(UNLOCODE_COUNTRIES_NS, String.format("https://%s/unlocode-countries#", DOMAIN));
         NS_MAP.put(UNLOCODE_SUBDIVISIONS_NS, String.format("https://%s/unlocode-subdivisions#", DOMAIN));
         NS_MAP.put(UNLOCODE_FUNC_NS, String.format("https://%s/unlocode-functions#", DOMAIN));
-        NS_MAP.put(UNLOCODE_VOCAB_NS, String.format("https://%s/unlocode-vocab#", DOMAIN));
+        NS_MAP.put(UNLOCODE_VOCAB_NS, String.format("https://%s/unlocode-vocab/", DOMAIN));
         NS_MAP.put(UNECE_NS, String.format("https://%s/", DOMAIN));
         NS_MAP.put(REC20_NS, String.format("https://%s/rec20#", DOMAIN));
         NS_MAP.put(REC21_NS, String.format("https://%s/rec21#", DOMAIN));
@@ -88,35 +77,40 @@ public abstract class Transformer {
     }
 
 
-    protected Transformer(String inputFile, String outputFile, boolean prettyPrint) {
+    protected Transformer(String inputFile) {
         this.inputFile = inputFile;
-        this.outputFile = outputFile;
-        this.prettyPrint = prettyPrint;
-
-        jsonObjectBuilder = Json.createObjectBuilder();
-        graphJsonArrayBuilder = Json.createArrayBuilder();
-
-        setContext();
 
     }
 
-    protected void setContext (){
-        contextObjectBuilder = Json.createObjectBuilder();
+    public Transformer(String inputFile, String defaultFile) {
+        this.inputFile = inputFile;
+        this.defaultFile = defaultFile;
+    }
+
+
+    protected JsonObjectBuilder getContext (){
+        JsonObjectBuilder contextObjectBuilder = Json.createObjectBuilder();
         //common context for all vocabularies
         for (String ns : Arrays.asList(UNECE_NS, RDF_NS, RDFS_NS)){
             contextObjectBuilder.add(ns, NS_MAP.get(ns));
         }
+        return contextObjectBuilder;
     }
 
-    protected void setMinimalContext (){
-        contextObjectBuilder = Json.createObjectBuilder();
+    protected JsonObjectBuilder getMinimalContext (){
         //common context for all vocabularies
-        contextObjectBuilder.add(RDFS_NS, NS_MAP.get(RDFS_NS));
+        return Json.createObjectBuilder().add(RDFS_NS, NS_MAP.get(RDFS_NS));
     }
 
     public void transform() throws IOException, InvalidFormatException {
         FileGenerator fileGenerator = new FileGenerator();
-        fileGenerator.generateFile(contextObjectBuilder, graphJsonArrayBuilder, this.prettyPrint, outputFile);
+        for (JSONLDVocabulary JSONLDVocabulary : vocabularies) {
+            fileGenerator.generateFile(JSONLDVocabulary.getContextObjectBuilder(), JSONLDVocabulary.getGraphJsonArrayBuilder(), JSONLDVocabulary.isPrettyPrint(), JSONLDVocabulary.getOutputFile());
+        }
+
+        for (JSONLDContext  jsonldContext: contexts) {
+            fileGenerator.generateFile(jsonldContext.getContextObjectBuilder(), null, jsonldContext.isPrettyPrint(), jsonldContext.getOutputFile());
+        }
     }
 
     protected abstract void readInputFileToGraphArray(Object object);
@@ -172,5 +166,9 @@ public abstract class Transformer {
 
     protected void setInputFiles(Set<String> inputFiles){
         this.inputFiles = inputFiles;
+    }
+
+    public void setDefaultInputFiles(Set<String> defaultInputFiles) {
+        this.defaultInputFiles = defaultInputFiles;
     }
 }

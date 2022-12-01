@@ -1,25 +1,33 @@
 package org.unece.uncefact.vocab.transformers;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.unece.uncefact.vocab.JSONLDVocabulary;
+import org.unece.uncefact.vocab.Transformer;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class REC24ToJSONLDVocabulary extends WorkBookTransformer {
 
-    public REC24ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
-        super(inputFile, outputFile, prettyPrint);
-
-        contextObjectBuilder.add(REC24_NS, NS_MAP.get(REC24_NS));
+    public REC24ToJSONLDVocabulary(String inputFile, String defaultFile) {
+        super(inputFile, defaultFile);
     }
 
     public void readInputFileToGraphArray(final Object object) {
+        JSONLDVocabulary JSONLDVocabulary = new JSONLDVocabulary(StringUtils.join(REC24_NS, ".jsonld"), true);
+        JSONLDVocabulary.setContextObjectBuilder(getContext());
+        JSONLDVocabulary.getContextObjectBuilder().add(REC24_NS, NS_MAP.get(REC24_NS));
+
         Workbook workbook = (Workbook) object;
         Sheet sheet = workbook.getSheetAt(0);
         Iterator<Row> rowIterator = sheet.rowIterator();
@@ -46,8 +54,9 @@ public class REC24ToJSONLDVocabulary extends WorkBookTransformer {
             rdfClass.add(RDFS_COMMENT, description);
             rdfClass.add(RDFS_LABEL, name);
             rdfClass.add(RDF_VALUE, code);
-            graphJsonArrayBuilder.add(rdfClass);
+            JSONLDVocabulary.getGraphJsonArrayBuilder().add(rdfClass);
         }
+        vocabularies.add(JSONLDVocabulary);
     }
 
 }

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.unece.uncefact.vocab.JSONLDVocabulary;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -12,13 +13,16 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class REC28ToJSONLDVocabulary extends WorkBookTransformer {
-    public REC28ToJSONLDVocabulary(String inputFile, String outputFile, boolean prettyPrint) {
-        super(inputFile, outputFile, prettyPrint);
 
-        contextObjectBuilder.add(REC28_NS, NS_MAP.get(REC28_NS));
+    public REC28ToJSONLDVocabulary(String inputFile, String defaultFile) {
+        super(inputFile, defaultFile);
     }
 
     public void readInputFileToGraphArray(final Object object) {
+        JSONLDVocabulary JSONLDVocabulary = new JSONLDVocabulary(StringUtils.join(REC28_NS, ".jsonld"), true);
+        JSONLDVocabulary.setContextObjectBuilder(getContext());
+        JSONLDVocabulary.getContextObjectBuilder().add(REC28_NS, NS_MAP.get(REC28_NS));
+
         Workbook workbook = (Workbook) object;
         Sheet sheet = workbook.getSheetAt(0);
         Iterator<Row> rowIterator = sheet.rowIterator();
@@ -49,8 +53,9 @@ public class REC28ToJSONLDVocabulary extends WorkBookTransformer {
             rdfClass.add(RDFS_COMMENT, description);
             rdfClass.add(RDFS_LABEL, name);
             rdfClass.add(RDF_VALUE, code);
-            graphJsonArrayBuilder.add(rdfClass);
+            JSONLDVocabulary.getGraphJsonArrayBuilder().add(rdfClass);
         }
+        vocabularies.add(JSONLDVocabulary);
     }
 
 }
