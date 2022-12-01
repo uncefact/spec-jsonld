@@ -134,17 +134,6 @@ public class BSPToJSONLDVocabulary extends Transformer {
         Set<String> classKeys = new TreeSet<>();
         Map<String, Integer> repeatedClassKeys = new TreeMap<>();
         for (Entity entity : vocabulary.values()) {
-            if (entity.getType().equalsIgnoreCase(BBIE) || entity.getType().equalsIgnoreCase(ASBIE)) {
-                Set<Entity> entities = new HashSet<>();
-                String key = entity.getPropertyKey();
-                key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key);
-                if (propertiesMap.containsKey(key)) {
-                    entities = propertiesMap.get(key);
-                }
-                entities.add(entity);
-                propertiesMap.put(key, entities);
-            }
-
             if(entity.getType().equalsIgnoreCase(ABIE)){
                 String classKey = entity.getObjectClassTerm();
                 Integer count = 2;
@@ -161,6 +150,39 @@ public class BSPToJSONLDVocabulary extends Transformer {
             }
         }
         for (Entity entity : vocabulary.values()) {
+            if (entity.getType().equalsIgnoreCase(BBIE) || entity.getType().equalsIgnoreCase(ASBIE)) {
+                Set<Entity> entities = new HashSet<>();
+                String key = entity.getPropertyKey();
+                key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key);
+                if (propertiesMap.containsKey(key)) {
+                    entities = propertiesMap.get(key);
+                }
+                if (repeatedClassKeys.containsKey(entity.getAssociatedObjectClass())) {
+                    // fix for https://github.com/uncefact/spec-jsonld/issues/139
+                    // fixes the cases when the properties have the same key, but different type
+                    // in such cases the key is changed by using the proper associated class key
+                    if(repeatedClassKeys.get(entity.getAssociatedObjectClass()) != 2) {
+                        for (Entity e:entities){
+                            String classKeyToCompare = stripReferencedPrefix(e.getAssociatedClassTermWithQualifier());
+                            String classKey = stripReferencedPrefix(entity.getAssociatedClassTermWithQualifier());
+                            if (!classKeyToCompare.equalsIgnoreCase(classKey)) {
+                                key = entity.getPropertyTermWithQualifierForNDRRules().concat(classKey);
+                                key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key);
+                                if (propertiesMap.containsKey(key)) {
+                                    entities = propertiesMap.get(key);
+                                } else {
+                                    entities = new HashSet<>();
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                entities.add(entity);
+                propertiesMap.put(key, entities);
+            }
+        }
+        for (Entity entity : vocabulary.values()) {
             if (entity.getType().equalsIgnoreCase(ABIE)) {
                 Set<Entity> entities = new HashSet<>();
                 String key = entity.getObjectClassTerm();
@@ -168,14 +190,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     if(repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
                         key = entity.getObjectClassTerm();
                     } else {
-                        key = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
-                        if (key.startsWith("Referenced")) {
-
-                            key = StringUtils.substringAfter(key, "Referenced");
-                        }
-                        if (key.startsWith("_")) {
-                            key = StringUtils.substringAfter(key, "_");
-                        }
+                        key = stripReferencedPrefix(entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm()));
                     }
                 }
                 if (classesMap.containsKey(key)) {
@@ -257,13 +272,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                         if(repeatedClassKeys.get(entity.getAssociatedObjectClass()) == 2) {
                             rangeASBIE = entity.getAssociatedObjectClass();
                         } else {
-                            rangeASBIE = entity.getAssociatedClassTermWithQualifier();
-                            if (rangeASBIE.startsWith("Referenced")) {
-                                rangeASBIE = StringUtils.substringAfter(rangeASBIE, "Referenced");
-                            }
-                            if (rangeASBIE.startsWith("_")) {
-                                rangeASBIE = StringUtils.substringAfter(rangeASBIE, "_");
-                            }
+                            rangeASBIE = stripReferencedPrefix(entity.getAssociatedClassTermWithQualifier());
                         }
                     }
                 }
@@ -285,13 +294,7 @@ public class BSPToJSONLDVocabulary extends Transformer {
                     if(repeatedClassKeys.get(entity.getObjectClassTerm()) == 2) {
                         domainKey = entity.getObjectClassTerm();
                     } else {
-                        domainKey = entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm());
-                        if (domainKey.startsWith("Referenced")) {
-                            domainKey = StringUtils.substringAfter(domainKey, "Referenced");
-                        }
-                        if (domainKey.startsWith("_")) {
-                            domainKey = StringUtils.substringAfter(domainKey, "_");
-                        }
+                        domainKey = stripReferencedPrefix(entity.getObjectClassTermQualifier().concat(entity.getObjectClassTerm()));
                     }
                 }
                 domain.add(domainKey);
@@ -646,6 +649,16 @@ public class BSPToJSONLDVocabulary extends Transformer {
             }
         }
         return result;
+    }
+
+    public static String stripReferencedPrefix(String input){
+        if (input.startsWith("Referenced")) {
+            input = StringUtils.substringAfter(input, "Referenced");
+        }
+        if (input.startsWith("_")) {
+            input = StringUtils.substringAfter(input, "_");
+        }
+        return input;
     }
 
 }
