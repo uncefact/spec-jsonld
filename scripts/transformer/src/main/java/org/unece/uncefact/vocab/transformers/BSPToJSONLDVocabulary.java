@@ -556,7 +556,18 @@ public class BSPToJSONLDVocabulary extends Transformer {
         objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
         jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME, objectBuilder.build());
         for (String key : propertiesGraph.keySet()) {
-            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+            JsonObject property = propertiesGraph.get(key);
+            String propertyType = property.getJsonObject(SCHEMA_RANGE_INCLUDES).getString(ID);
+            Map<String, String> map;
+            JsonObjectBuilder propertyObjectBuilder = Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key)));
+            if (propertyType.startsWith(StringUtils.join(UNECE_NS,":","UNCL")) && propertyType.endsWith("Code")){
+                propertyObjectBuilder.add(TYPE, "@vocab");
+            } else if (propertyType.startsWith(StringUtils.join(UNECE_NS,":"))){
+                propertyObjectBuilder.add(TYPE, ID);
+            } else {
+                propertyObjectBuilder.add(TYPE, propertyType);
+            }
+            jsonldContext.getContextObjectBuilder().add(key, propertyObjectBuilder.build());
         }
         for (String key : classesGraph.keySet()) {
             jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());

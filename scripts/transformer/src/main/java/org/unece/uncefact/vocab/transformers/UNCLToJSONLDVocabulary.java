@@ -118,6 +118,7 @@ public class UNCLToJSONLDVocabulary extends Transformer {
                                 for (String key: classesGraph.keySet()){
                                     jsonldVocabulary.getGraphJsonArrayBuilder().add(classesGraph.get(key));
                                     jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+                                    this.jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
                                 }
                                 return;
                             }
@@ -206,9 +207,9 @@ public class UNCLToJSONLDVocabulary extends Transformer {
                     vocabulary.setPrettyPrint(true);
                     vocabulary.setContextObjectBuilder(getContext());
                     vocabulary.getContextObjectBuilder().add(codeNS, String.format(NS_MAP.get(UNECE_NS).concat("%s#"), codeNS));
+                    this.jsonldContext.getContextObjectBuilder().add(codeNS, String.format(NS_MAP.get(UNECE_NS).concat("%s#"), codeNS));
                     vocabularies.add(vocabulary);
                     vocabulary = new JSONLDVocabulary();
-
                 }
             }
             reader.close();
