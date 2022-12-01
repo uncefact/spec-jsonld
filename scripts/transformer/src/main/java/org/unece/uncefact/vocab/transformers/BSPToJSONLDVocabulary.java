@@ -545,17 +545,29 @@ public class BSPToJSONLDVocabulary extends Transformer {
         jsonldVocabulary.getGraphJsonArrayBuilder().add(statusProperty.build());
 
 
-        jsonldContext.getContextObjectBuilder().add("@vocab", NS_MAP.get(UNECE_NS));
         jsonldContext.getContextObjectBuilder().add(UNECE_NS, NS_MAP.get(UNECE_NS));
         jsonldContext.getContextObjectBuilder().add(RDF_NS, NS_MAP.get(RDF_NS));
         jsonldContext.getContextObjectBuilder().add(RDFS_NS, NS_MAP.get(RDFS_NS));
         jsonldContext.getContextObjectBuilder().add(XSD_NS, NS_MAP.get(XSD_NS));
         jsonldContext.getContextObjectBuilder().add(OWL_NS, NS_MAP.get(OWL_NS));
         jsonldContext.getContextObjectBuilder().add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
+        jsonldContext.getContextObjectBuilder().add("id", ID);
+        jsonldContext.getContextObjectBuilder().add("type", TYPE);
         objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
         jsonldContext.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME, objectBuilder.build());
         for (String key : propertiesGraph.keySet()) {
-            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+            JsonObject property = propertiesGraph.get(key);
+            String propertyType = property.getJsonObject(SCHEMA_RANGE_INCLUDES).getString(ID);
+            Map<String, String> map;
+            JsonObjectBuilder propertyObjectBuilder = Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key)));
+            if (propertyType.startsWith(StringUtils.join(UNECE_NS,":","UNCL")) && propertyType.endsWith("Code")){
+                propertyObjectBuilder.add(TYPE, "@vocab");
+            } else if (propertyType.startsWith(StringUtils.join(UNECE_NS,":"))){
+                propertyObjectBuilder.add(TYPE, ID);
+            } else {
+                propertyObjectBuilder.add(TYPE, propertyType);
+            }
+            jsonldContext.getContextObjectBuilder().add(key, propertyObjectBuilder.build());
         }
         for (String key : classesGraph.keySet()) {
             jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
