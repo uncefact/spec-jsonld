@@ -217,7 +217,13 @@ public class Entity {
         String propertyKey = getRepresentationTermForNDRRules();
         if (StringUtils.isBlank(getTDED()) || !codes.contains(getTDED())) {
             propertyKey = StringUtils.join(getPropertyTermWithQualifierForNDRRules(), propertyKey);
-            if (!StringUtils.isBlank(getAssociatedObjectClass())) {
+            // https://github.com/uncefact/spec-jsonld/issues/144#issuecomment-1333493717
+            // as type is widely used as an alias for @type in JSON-LD
+            // it was agreed to rename split `type` property
+            if (propertyKey.equalsIgnoreCase("type")){
+                propertyKey = StringUtils.join(getObjectClassTerm(), propertyKey);
+            }
+            else if (!StringUtils.isBlank(getAssociatedObjectClass())) {
                 propertyKey = StringUtils.join(propertyKey, getAssociatedObjectClass());
             }
         } else {
@@ -250,7 +256,12 @@ public class Entity {
             if(!StringUtils.startsWithIgnoreCase(propertyKey, split[i]))
                 propertyKey = StringUtils.join(split[i], propertyKey);
         }
-
+        // https://github.com/uncefact/spec-jsonld/issues/144#issuecomment-1333493717
+        // as id is widely used as an alias for @id in JSON-LD
+        // it was agreed to rename `id` property to `identifier`
+        if (propertyKey.equalsIgnoreCase("id")){
+            propertyKey = "identifier";
+        }
         return propertyKey;
     }
 
