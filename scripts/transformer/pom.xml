@@ -6,7 +6,7 @@
 
     <groupId>org.unece.uncefact</groupId>
     <artifactId>vocab-transformer</artifactId>
-    <version>1.0.0-rc11</version>
+    <version>1.0.0-rc12</version>
     <build>
         <plugins>
             <plugin>

@@ -377,7 +377,7 @@ public class UNLOCODEToJSONLDVocabulary extends Transformer {
 
         for (String key : vocabGraph.keySet()) {
             jsonldVocabulary.getGraphJsonArrayBuilder().add(vocabGraph.get(key));
-            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, key)).build());
+            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNLOCODE_VOCAB_NS, ":", key))).build());
         }
         vocabularies.add(jsonldVocabulary);
         contexts.add(jsonldContext);
