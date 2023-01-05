@@ -75,6 +75,14 @@ public class TransformationRunner {
         }
 
         switch (transformationType.toLowerCase()) {
+            case "bsp":
+                BSPJSONSchemaToJSONLDVocabulary bspSchema = new BSPJSONSchemaToJSONLDVocabulary(null, "/UNECE-BSPContextCCL.json");
+                bspSchema.transform();
+                JSONLDVocabulary bspSchemaVocabulary = bspSchema.getJsonldVocabulary();
+                new FileGenerator().generateFile(bspSchemaVocabulary.getContextObjectBuilder(), bspSchemaVocabulary.getGraphJsonArrayBuilder(), true, String.format("%s-from-schema.jsonld", UNECE_NS));
+
+                break;
+
             case UNECE_NS:
                 String uneceFile = null;
                 String unclFile = null;
