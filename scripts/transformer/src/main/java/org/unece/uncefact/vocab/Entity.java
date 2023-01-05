@@ -107,7 +107,10 @@ public class Entity {
     }
 
     public String getRepresentationTermForNDRRules() {
-        if (representationTerm.equalsIgnoreCase("Text")) {
+        if (representationTerm == null){
+            return "";
+        }
+        if ( representationTerm.equalsIgnoreCase("Text")) {
             List<String> exceptions = Arrays.asList(
                     new String[]{"deliveryinstructions"});
             if (getPropertyTerm() != null && exceptions.contains(getPropertyTerm().toLowerCase()))
@@ -184,7 +187,7 @@ public class Entity {
     }
 
     public String getAssociatedClassTermWithQualifier() {
-        return this.associatedObjectClassTermQualifier.concat(this.associatedObjectClass);
+        return StringUtils.defaultIfEmpty(this.associatedObjectClassTermQualifier,"").concat(this.associatedObjectClass);
     }
 
     public String getPropertyTermWithQualifier() {
@@ -291,6 +294,8 @@ public class Entity {
     }
 
     public String getTDED() {
+        if (TDED == null)
+            return "";
         if (TDED.length() > 4) {
             TDED = TDED.substring(1, 5);
         }
