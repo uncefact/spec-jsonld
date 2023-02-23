@@ -1,0 +1,6 @@
+[submodule "scripts/transformer/src/main/resources/spec-JSONschema"]
+	path = scripts/transformer/src/main/resources/spec-JSONschema
+	url = https://github.com/uncefact/spec-JSONschema
+[submodule "scripts/transformer/src/spec-JSONschema"]
+	path = scripts/transformer/src/spec-JSONschema
+	url = https://github.com/uncefact/spec-JSONschema

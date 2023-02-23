@@ -6,8 +6,16 @@
 
     <groupId>org.unece.uncefact</groupId>
     <artifactId>vocab-transformer</artifactId>
-    <version>1.0.0-rc12</version>
+    <version>2.0.0-rc1</version>
     <build>
+        <resources>
+            <resource>
+                <directory>src/spec-JSONschema/JSONschema2020-12/meta-library/BuyShipPay</directory>
+                <includes>
+                    <include>D22A/**/*.json</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
