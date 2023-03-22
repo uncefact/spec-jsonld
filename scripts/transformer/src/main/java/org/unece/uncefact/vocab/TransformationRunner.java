@@ -79,7 +79,7 @@ public class TransformationRunner {
                 BSPJSONSchemaToJSONLDVocabulary bspSchema = new BSPJSONSchemaToJSONLDVocabulary(null, "/UNECE-BSPContextCCL.json");
                 bspSchema.transform();
                 JSONLDVocabulary bspSchemaVocabulary = bspSchema.getJsonldVocabulary();
-                new FileGenerator().generateFile(bspSchemaVocabulary.getContextObjectBuilder(), bspSchemaVocabulary.getGraphJsonArrayBuilder(), true, String.format("%s-from-schema.jsonld", UNECE_NS));
+                new FileGenerator().generateFile(bspSchemaVocabulary.getContextObjectBuilder(), bspSchemaVocabulary.getGraphJsonArrayBuilder(), true, String.format("%s-from-schema-final.jsonld", UNECE_NS));
 
                 break;
 
