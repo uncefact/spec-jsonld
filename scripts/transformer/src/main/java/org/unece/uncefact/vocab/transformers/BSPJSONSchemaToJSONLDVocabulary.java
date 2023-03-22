@@ -662,102 +662,86 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
             jsonldVocabulary.getGraphJsonArrayBuilder().add(classesGraph.get(key));
         }
 
-        JsonObjectBuilder aggregateBIE = Json.createObjectBuilder(Map.of(
-                ID, UNECE_ABIE_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_ABIE_PROPERTY_NAME,
-                RDFS_COMMENT, "Aggregate Business Information Entity"
-        ));
+        JsonObjectBuilder aggregateBIE = Json.createObjectBuilder();
+        aggregateBIE.add(ID, UNECE_ABIE_PROPERTY);
+        aggregateBIE.add(TYPE, RDF_PROPERTY);
+        aggregateBIE.add(RDFS_LABEL, UNECE_ABIE_PROPERTY_NAME);
+        aggregateBIE.add(RDFS_COMMENT, "Aggregate Business Information Entity");
         jsonldVocabulary.getGraphJsonArrayBuilder().add(aggregateBIE.build());
 
-        JsonObjectBuilder basicBIE = Json.createObjectBuilder(Map.of(
-                ID, UNECE_BBIE_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_BBIE_PROPERTY_NAME,
-                RDFS_COMMENT, "Basic Business Information Entity contained within the ABIE"
-        ));
+        JsonObjectBuilder basicBIE = Json.createObjectBuilder();
+        basicBIE.add(ID, UNECE_BBIE_PROPERTY);
+        basicBIE.add(TYPE, RDF_PROPERTY);
+        basicBIE.add(RDFS_LABEL, UNECE_BBIE_PROPERTY_NAME);
+        basicBIE.add(RDFS_COMMENT, "Basic Business Information Entity contained within the ABIE");
+
         jsonldVocabulary.getGraphJsonArrayBuilder().add(basicBIE.build());
 
-        JsonObjectBuilder associationBIE = Json.createObjectBuilder(Map.of(
-                ID, UNECE_ASBIE_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_ASBIE_PROPERTY_NAME,
-                RDFS_COMMENT, "Associated (Aggregate) Business Information Entity, associated with the ABIE"
-        ));
+        JsonObjectBuilder associationBIE = Json.createObjectBuilder();
+        associationBIE.add(ID, UNECE_ASBIE_PROPERTY);
+        associationBIE.add(TYPE, RDF_PROPERTY);
+        associationBIE.add(RDFS_LABEL, UNECE_ASBIE_PROPERTY_NAME);
+        associationBIE.add(RDFS_COMMENT, "Basic Business Information Entity contained within the ABIE");
+
         jsonldVocabulary.getGraphJsonArrayBuilder().add(associationBIE.build());
 
-        JsonObjectBuilder tded = Json.createObjectBuilder(Map.of(
-                ID, UNECE_TDED_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_TDED_PROPERTY_NAME,
-                RDFS_COMMENT, "TDED reference number"
-        ));
+        JsonObjectBuilder tded = Json.createObjectBuilder();
+        tded.add(ID, UNECE_TDED_PROPERTY);
+        tded.add(TYPE, RDF_PROPERTY);
+        tded.add(RDFS_LABEL, UNECE_TDED_PROPERTY_NAME);
+        tded.add(RDFS_COMMENT, "TDED reference number");
+
         jsonldVocabulary.getGraphJsonArrayBuilder().add(tded.build());
 
-        /*JsonObjectBuilder status = Json.createObjectBuilder(Map.of(
-                ID, UNECE_STATUS_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_STATUS_PROPERTY_NAME,
-                RDFS_COMMENT, "Status"
-        ));
-        jsonldVocabulary.getGraphJsonArrayBuilder().add(status.build());*/
-
-        JsonObjectBuilder cefactUNId = Json.createObjectBuilder(Map.of(
-                ID, UNECE_CEFACT_UN_ID_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_CEFACT_UN_ID_PROPERTY_NAME,
-                RDFS_COMMENT, "TBG assigned Unique ID for approved Library Objects"
-        ));
+        JsonObjectBuilder cefactUNId = Json.createObjectBuilder();
+        cefactUNId.add(ID, UNECE_CEFACT_UN_ID_PROPERTY);
+        cefactUNId.add(TYPE, RDF_PROPERTY);
+        cefactUNId.add(RDFS_LABEL, UNECE_CEFACT_UN_ID_PROPERTY_NAME);
+        cefactUNId.add(RDFS_COMMENT, "TBG assigned Unique ID for approved Library Objects");
         jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactUNId.build());
 
-        JsonObjectBuilder cefactBusinessProcess = Json.createObjectBuilder(Map.of(
-                ID, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY_NAME,
-                RDFS_COMMENT, "CEFACT Business Process"
-        ));
+        JsonObjectBuilder cefactBusinessProcess = Json.createObjectBuilder();
+        cefactBusinessProcess.add(ID, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY);
+        cefactBusinessProcess.add(TYPE, RDF_PROPERTY);
+        cefactBusinessProcess.add(RDFS_LABEL, UNECE_CEFACT_BUSINESS_PROCESS_PROPERTY_NAME);
+        cefactBusinessProcess.add(RDFS_COMMENT, "CEFACT Business Process");
         jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactBusinessProcess.build());
 
-        JsonObjectBuilder cefactElementMetadata = Json.createObjectBuilder(Map.of(
-                ID, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY,
-                TYPE, RDF_SEQ,
-                RDFS_LABEL, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY_NAME,
-                RDFS_COMMENT, "CEFACT Element Metadata"
-        ));
+        JsonObjectBuilder cefactElementMetadata = Json.createObjectBuilder();
+        cefactElementMetadata.add(ID, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY);
+        cefactElementMetadata.add(TYPE, RDF_SEQ);
+        cefactElementMetadata.add(RDFS_LABEL, UNECE_CEFACT_ELEMENT_METADATA_PROPERTY_NAME);
+        cefactElementMetadata.add(RDFS_COMMENT, "CEFACT Element Metadata");
         jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactElementMetadata.build());
 
-        JsonObjectBuilder cefactBieDomainClass = Json.createObjectBuilder(Map.of(
-                ID, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY,
-                TYPE, RDF_PROPERTY,
-                RDFS_LABEL, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME,
-                RDFS_COMMENT, "CEFACT Business Process"
-        ));
+        JsonObjectBuilder cefactBieDomainClass = Json.createObjectBuilder();
+        cefactBieDomainClass.add(ID, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY);
+        cefactBieDomainClass.add(TYPE, RDF_PROPERTY);
+        cefactBieDomainClass.add(RDFS_LABEL, UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY_NAME);
+        cefactBieDomainClass.add(RDFS_COMMENT, "CEFACT Business Process");
         jsonldVocabulary.getGraphJsonArrayBuilder().add(cefactBieDomainClass.build());
 
         for (String qdt : qdtMap.keySet()) {
-            JsonObjectBuilder qdtClass = Json.createObjectBuilder(Map.of(
-                    ID, StringUtils.join(UNECE_NS, ":", qdt),
-                    TYPE, RDFS_CLASS,
-                    RDFS_LABEL, qdt,
-                    RDFS_COMMENT, qdtMap.get(qdt)
-            ));
+            JsonObjectBuilder qdtClass = Json.createObjectBuilder();
+            qdtClass.add(ID, StringUtils.join(UNECE_NS, ":", qdt));
+            qdtClass.add(TYPE, RDFS_CLASS);
+            qdtClass.add(RDFS_LABEL, qdt);
+            qdtClass.add(RDFS_COMMENT, qdtMap.get(qdt));
             jsonldVocabulary.getGraphJsonArrayBuilder().add(qdtClass.build());
 
             if (unitCodeTypes.contains(qdt)){
                 String valueId = qdt.concat("Value");
-                JsonObjectBuilder unitCodeValueProperty = Json.createObjectBuilder(Map.of(
-                        ID, StringUtils.join(UNECE_NS, ":", valueId),
-                        TYPE, RDF_PROPERTY,
-                        RDFS_LABEL, valueId,
-                        RDFS_COMMENT, "The numeric value."
-                ));
+                JsonObjectBuilder unitCodeValueProperty = Json.createObjectBuilder();
+                unitCodeValueProperty.add(ID, StringUtils.join(UNECE_NS, ":", valueId));
+                unitCodeValueProperty.add(TYPE, RDF_PROPERTY);
+                unitCodeValueProperty.add(RDFS_LABEL, valueId);
+                unitCodeValueProperty.add(RDFS_COMMENT, "The numeric value.");
                 unitCodeValueProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
                         ID, StringUtils.join(XSD_NS, ":", "decimal")
                 )));
                 unitCodeValueProperty.add(SCHEMA_DOMAIN_INCLUDES, Json.createObjectBuilder(Map.of(
                         ID, StringUtils.join(UNECE_NS, ":", qdt)
                 )));
-
                 jsonldVocabulary.getGraphJsonArrayBuilder().add(unitCodeValueProperty.build());
 
                 JsonArrayBuilder typeArray = Json.createArrayBuilder();
@@ -773,12 +757,11 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
                 } else {
                     System.out.println(unitCodeCodePropertyRange);
                 }
-                JsonObjectBuilder unitCodeCodeProperty = Json.createObjectBuilder(Map.of(
-                        ID, StringUtils.join(UNECE_NS, ":", codeId),
-                        RDFS_LABEL, codeId,
-                        RDFS_COMMENT, "The unit code."
-                ));
+                JsonObjectBuilder unitCodeCodeProperty = Json.createObjectBuilder();
+                unitCodeCodeProperty.add(ID, StringUtils.join(UNECE_NS, ":", codeId));
                 unitCodeCodeProperty.add(TYPE, typeArray);
+                unitCodeCodeProperty.add(RDFS_LABEL, codeId);
+                unitCodeCodeProperty.add(RDFS_COMMENT, "The unit code.");
                 unitCodeCodeProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
                         ID, StringUtils.join(UNECE_NS, ":", unitCodeCodePropertyRange)
                 )));
@@ -787,22 +770,20 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
                 )));
                 jsonldVocabulary.getGraphJsonArrayBuilder().add(unitCodeCodeProperty.build());
 
-                JsonObjectBuilder typeClass = Json.createObjectBuilder(Map.of(
-                        ID, StringUtils.join(UNECE_NS, ":", unitCodeCodePropertyRange),
-                        TYPE, RDFS_CLASS,
-                        RDFS_LABEL, unitCodeCodePropertyRange,
-                        RDFS_COMMENT, String.format("RDF Class for %s unit code type to define unit code values.", qdt)
-                ));
+                JsonObjectBuilder typeClass = Json.createObjectBuilder();
+                typeClass.add(ID, StringUtils.join(UNECE_NS, ":", unitCodeCodePropertyRange));
+                typeClass.add(TYPE, RDFS_CLASS);
+                typeClass.add(RDFS_LABEL, unitCodeCodePropertyRange);
+                typeClass.add(RDFS_COMMENT, String.format("RDF Class for %s unit code type to define unit code values.", qdt));
                 jsonldVocabulary.getGraphJsonArrayBuilder().add(typeClass.build());
             }
             else if (amountTypes.contains(qdt)) {
                 String valueId = qdt.concat("Value");
-                JsonObjectBuilder unitCodeValueProperty = Json.createObjectBuilder(Map.of(
-                        ID, StringUtils.join(UNECE_NS, ":", valueId),
-                        TYPE, RDF_PROPERTY,
-                        RDFS_LABEL, valueId,
-                        RDFS_COMMENT, "A number of monetary units."
-                ));
+                JsonObjectBuilder unitCodeValueProperty = Json.createObjectBuilder();
+                unitCodeValueProperty.add(ID, StringUtils.join(UNECE_NS, ":", valueId));
+                unitCodeValueProperty.add(TYPE, RDF_PROPERTY);
+                unitCodeValueProperty.add(RDFS_LABEL, valueId);
+                unitCodeValueProperty.add(RDFS_COMMENT, "A number of monetary units.");
                 unitCodeValueProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
                         ID, StringUtils.join(XSD_NS, ":", "decimal")
                 )));
@@ -823,12 +804,10 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
                 } else {
                     System.out.println(unitCodeCodePropertyRange);
                 }
-                JsonObjectBuilder unitCodeCodeProperty = Json.createObjectBuilder(Map.of(
-                        ID, StringUtils.join(UNECE_NS, ":", codeId),
-                        RDFS_LABEL, codeId,
-                        RDFS_COMMENT, "An amount currency code."
-                ));
-                unitCodeCodeProperty.add(TYPE, typeArray);
+                JsonObjectBuilder unitCodeCodeProperty = Json.createObjectBuilder();
+                unitCodeCodeProperty.add(ID, StringUtils.join(UNECE_NS, ":", codeId));
+                unitCodeCodeProperty.add(RDFS_LABEL, codeId);
+                unitCodeCodeProperty.add(RDFS_COMMENT, "An amount currency code.");
                 unitCodeCodeProperty.add(SCHEMA_RANGE_INCLUDES, Json.createObjectBuilder(Map.of(
                         ID, StringUtils.join(UNECE_NS, ":", unitCodeCodePropertyRange)
                 )));
@@ -837,12 +816,11 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
                 )));
                 jsonldVocabulary.getGraphJsonArrayBuilder().add(unitCodeCodeProperty.build());
 
-                JsonObjectBuilder typeClass = Json.createObjectBuilder(Map.of(
-                        ID, StringUtils.join(UNECE_NS, ":", unitCodeCodePropertyRange),
-                        TYPE, RDFS_CLASS,
-                        RDFS_LABEL, unitCodeCodePropertyRange,
-                        RDFS_COMMENT, String.format("RDF Class for %s amount type to define currency codes.", qdt)
-                ));
+                JsonObjectBuilder typeClass = Json.createObjectBuilder();
+                typeClass.add(ID, StringUtils.join(UNECE_NS, ":", unitCodeCodePropertyRange));
+                typeClass.add(TYPE, RDFS_CLASS);
+                typeClass.add(RDFS_LABEL, unitCodeCodePropertyRange);
+                typeClass.add(RDFS_COMMENT, String.format("RDF Class for %s amount type to define currency codes.", qdt));
                 jsonldVocabulary.getGraphJsonArrayBuilder().add(typeClass.build());
             }
 
@@ -875,7 +853,7 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
             jsonldContext.getContextObjectBuilder().add(key, propertyObjectBuilder.build());
         }
         for (String key : classesGraph.keySet()) {
-            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS,":", key))).build());
+            jsonldContext.getContextObjectBuilder().add(key, Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS, ":", key))).build());
         }
         jsonldContext.getContextObjectBuilder().add(UNECE_ABIE_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_ABIE_PROPERTY)).build());
         jsonldContext.getContextObjectBuilder().add(UNECE_BBIE_PROPERTY_NAME, Json.createObjectBuilder(Map.of(ID, UNECE_BBIE_PROPERTY)).build());
@@ -899,6 +877,7 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
     }
 
     Object getData(String dataType, Set<String> TDED) {
+        //TODO: add a sanity check for TDED and dataType
         JsonObjectBuilder result = Json.createObjectBuilder();
         TreeSet<String> filteredTDED = new TreeSet<>();
         /*for (String item : TDED) {
