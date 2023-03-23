@@ -34,6 +34,7 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
 
     Map<String, JsonObject> propertiesGraph = new TreeMap<>();
     Map<String, JsonObject> classesGraph = new TreeMap<>();
+    Map<String, JsonObject> codeValuesGraph = new TreeMap<>();
 
     Map<String, String> rangeDataTypeMap = new HashMap<>();
     Map<String, String> rangeObjectTypeMap = new HashMap<>();
@@ -650,16 +651,15 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
         jsonldVocabulary.getContextObjectBuilder().add(SCHEMA_NS, NS_MAP.get(SCHEMA_NS));
         JsonObjectBuilder objectBuilder = Json.createObjectBuilder(Map.of(TYPE, ID));
         jsonldVocabulary.getContextObjectBuilder().add(UNECE_CEFACT_BIE_DOMAIN_CLASS_PROPERTY, objectBuilder.build());
-        List<String> codeList = new ArrayList<>(codeListContext.keySet());
-        Collections.sort(codeList);
-        for (String code:codeList){
-            jsonldVocabulary.getContextObjectBuilder().add(code, codeListContext.get(code));
-        }
         for (String key : propertiesGraph.keySet()) {
             jsonldVocabulary.getGraphJsonArrayBuilder().add(propertiesGraph.get(key));
         }
         for (String key : classesGraph.keySet()) {
             jsonldVocabulary.getGraphJsonArrayBuilder().add(classesGraph.get(key));
+        }
+
+        for (String key : codeValuesGraph.keySet()) {
+            jsonldVocabulary.getGraphJsonArrayBuilder().add(codeValuesGraph.get(key));
         }
 
         JsonObjectBuilder aggregateBIE = Json.createObjectBuilder();
@@ -1262,29 +1262,17 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
                         continue;
                 }
                 JsonObjectBuilder oneOfObject = Json.createObjectBuilder();
-                oneOfObject.add(ID, StringUtils.join(codeListId, ":", oneOfId));
+                String id = StringUtils.join(UNECE_NS, ":", qdtTitle, "#", oneOfId);
+                oneOfObject.add(ID, id);
                 oneOfObject.add(TYPE, StringUtils.join(UNECE_NS, ":", qdtTitle));
                 oneOfObject.add(RDF_VALUE, oneOfId);
                 oneOfObject.add(RDFS_COMMENT, oneOfTitle);
-                codeListVocabulary.getGraphJsonArrayBuilder().add(oneOfObject);
+                codeValuesGraph.put(id, oneOfObject.build());
             }
         }
         if (codeListId.equalsIgnoreCase("string")) {
             System.out.println(qdtTitle);
         }
-
-
-
-
-        codeListVocabulary.getContextObjectBuilder().add(UNECE_NS, NS_MAP.get(UNECE_NS));
-        codeListVocabulary.getContextObjectBuilder().add(RDF_NS, NS_MAP.get(RDF_NS));
-        codeListVocabulary.getContextObjectBuilder().add(RDFS_NS, NS_MAP.get(RDFS_NS));
-        codeListVocabulary.getContextObjectBuilder().add(codeListId, StringUtils.join(NS_MAP.get(UNECE_NS), "codelists/", codeListId));
-
-        codeListContext.put(codeListId, StringUtils.join(NS_MAP.get(UNECE_NS), "codelists/", codeListId));
-        codeListMapping.put(qdtTitle, StringUtils.join("codelists/", codeListId));
-
-        new FileGenerator().generateFile(codeListVocabulary.getContextObjectBuilder(), codeListVocabulary.getGraphJsonArrayBuilder(), true, String.format("codelists/%s.jsonld", codeListId));
 
 
     }
