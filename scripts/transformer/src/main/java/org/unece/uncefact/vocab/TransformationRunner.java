@@ -76,6 +76,8 @@ public class TransformationRunner {
                 bspSchema.transform();
                 JSONLDVocabulary bspSchemaVocabulary = bspSchema.getJsonldVocabulary();
                 new FileGenerator().generateFile(bspSchemaVocabulary.getContextObjectBuilder(), bspSchemaVocabulary.getGraphJsonArrayBuilder(), true, String.format("%s-from-schema-final.jsonld", UNECE_NS));
+                JSONLDContext jsonldContext = bspSchema.getJsonldContext();
+                new FileGenerator().generateFile(jsonldContext.getContextObjectBuilder(), null, true, String.format("%s-from-schema-final-context.jsonld", UNECE_NS));
                 break;
 
             case UNLOCODE_NS:
