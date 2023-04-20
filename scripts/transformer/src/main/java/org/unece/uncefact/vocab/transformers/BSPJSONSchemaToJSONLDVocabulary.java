@@ -40,6 +40,7 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
     Map<String, String> rangeObjectTypeMap = new HashMap<>();
     Set<String> unitCodeTypes = new HashSet<>();
     Set<String> amountTypes = new HashSet<>();
+    Set<String> codeListTypes = new HashSet<>();
     Map<String, String> qdtMap = new HashMap<>();
     Map<String, String> codeListContext = new HashMap<>();
     Map<String, String> codeListMapping = new HashMap<>();
@@ -843,7 +844,7 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
             Map<String, String> map;
             JsonObjectBuilder propertyObjectBuilder = Json.createObjectBuilder(Map.of(ID, StringUtils.join(UNECE_NS, ":", key)));
             //TODO: fix type check
-            if (propertyType.startsWith(StringUtils.join(UNECE_NS, ":", "UNCL")) && propertyType.endsWith("Code")) {
+            if (codeListTypes.contains(propertyType)) {
                 propertyObjectBuilder.add(TYPE, "@vocab");
             } else if (propertyType.startsWith(StringUtils.join(UNECE_NS, ":"))) {
                 propertyObjectBuilder.add(TYPE, ID);
@@ -1268,6 +1269,7 @@ public class BSPJSONSchemaToJSONLDVocabulary extends Transformer {
                 oneOfObject.add(RDF_VALUE, oneOfId);
                 oneOfObject.add(RDFS_COMMENT, oneOfTitle);
                 codeValuesGraph.put(id, oneOfObject.build());
+                codeListTypes.add(StringUtils.join(UNECE_NS, ":", qdtTitle));
             }
         }
         if (codeListId.equalsIgnoreCase("string")) {
