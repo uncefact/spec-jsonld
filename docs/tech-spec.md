@@ -210,6 +210,7 @@ The current version of vocabulary was automatically generated from the CEFACT Bu
   * If as a result property name is `id` - rename it to `identifier`. If it's `type` - prepend `Object Class Term`. (see https://github.com/uncefact/spec-jsonld/issues/144#issuecomment-1333493717) 
 * ASBIEs are grouped by `Property Term Qualifier(s)` + `Property Term` + `Associated Object Class` as RDFS Properties
 
+At the last phase of the project we switched from the CEFACT Buy-Ship-Pay Reference Data Model xls file to [JSON Schema](https://github.com/uncefact/spec-JSONschema/blob/main/JSONschema2020-12/meta-library/BuyShipPay/D22A/UNECE-BSPContextCCL.json), but kept the NDRs and used "title" property to get Terms and Qualifiers for NDRs.
 
 #### De-duplication
 
