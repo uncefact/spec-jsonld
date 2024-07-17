@@ -193,9 +193,22 @@ Within this primary goal, there are several more detailed requirements
 
 The current version of vocabulary was automatically generated from the CEFACT Buy-Ship-Pay Reference Data Model xls file, following the rules listed below.
 
-* ABIEs are grouped by `Object Class Term` as RDFS Classes
+* ABIEs are grouped by `Object Class Term Qualifier(s)` + `Object Class Term` as RDFS Classes
+  * but 'Referenced' qualifier is taken out (see [#63](https://github.com/uncefact/spec-jsonld/issues/63))
 * BBIEs are grouped by `Property Term Qualifier(s)` + `Property Term` + `Datatype Qualifier(s)` + `Representation Term` as RDFS Properties
-* ASBIEs are grouped by `Property Term Qualifier(s)` + `Property Term` + `Associated Object Class Term Qualifier(s)` + `Associated Object Class` as RDFS Properties
+  * TDED is empty, Property Term Qualifier is empty, Datatype Qualifier is not empty
+    * `Datatype Qualifier(s)` + `Property Term` + `Representation Term` (Datatype Qualifier doesn't contain Property Term - if the property term isn't a part of the DTQ, both of them are used)
+    * `Object Class Term Qualifier(s)` + `Object Class Term` + `Datatype Qualifier(s)` + `Representation Term`(Datatype Qualifier equals Property Term - to distinct it from a property with the same key, but no DTQ defined, see UN01002112)
+    * `Datatype Qualifier(s)` + `Property Term` + `Representation Term` (Datatype Qualifier contains Property Term, but doesn't equal to it - use DTQ to distinct properties from ones with the same property term)
+  * TDED is not empty, Datatype Qualifier is empty
+    * `Object Class Term Qualifier(s)` + `Object Class Term` + `Representation Term`(TDED is specified but the DTQ isn't, the object class data is being used to create a meaningful property key)
+  * TDED is not empty, Datatype Qualifier is not empty
+    * `Datatype Qualifier(s)` + `Property Term Qualifier(s)` + `Property Term` + `Representation Term` (property term isn't a part of the DTQ, both of them are used)
+    * `Object Class Term Qualifier(s)` + `Object Class Term` + `Datatype Qualifier(s)` + `Representation Term`(Datatype Qualifier equals Property Term - to distinct it from a property with the same key, but no DTQ defined, see UN01002112)
+    * `Datatype Qualifier(s)` + `Property Term Qualifier(s)` + `Property Term` + `Representation Term` (Datatype Qualifier contains Property Term, but doesn't equal to it - use DTQ to distinct properties from ones with the same property term)
+  * Representation Term - `Text` is omited, `Identifier` is replaced by `Id`
+  * If as a result property name is `id` - rename it to `identifier`. If it's `type` - prepend `Object Class Term`. (see https://github.com/uncefact/spec-jsonld/issues/144#issuecomment-1333493717) 
+* ASBIEs are grouped by `Property Term Qualifier(s)` + `Property Term` + `Associated Object Class` as RDFS Properties
 
 
 #### De-duplication
