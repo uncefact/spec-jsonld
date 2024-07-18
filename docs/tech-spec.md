@@ -551,7 +551,7 @@ Probably the most broadly used vocabulary on the internet. It has an overlap on 
 
 ### GeoSPARQL
 | UNCEFACT Class | Mapping | GeoSPARQL Simple Features Class |
-|---|---|---|---|---|
+|---|---|---|
 | uncefact:Polygon | owl:equivalentClass | sf:Polygon | 
 | uncefact:LinearRing | owl:equivalentClass | sf:LinearRing | 
 | uncefact:GeographicalPoint | owl:equivalentClass | sf:Point |
